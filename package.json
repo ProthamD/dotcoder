@@ -1,0 +1,16 @@
+{
+  "name": "dot-coder",
+  "version": "1.0.0",
+  "description": ".coder - Study notes and discussion platform",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev"
+  }
+}
