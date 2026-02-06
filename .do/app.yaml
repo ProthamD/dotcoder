@@ -1,0 +1,50 @@
+name: dot-coder
+region: nyc
+
+# Backend Service
+services:
+  - name: backend
+    github:
+      repo: YOUR_GITHUB_USERNAME/dot_coder_notebook
+      branch: main
+      deploy_on_push: true
+    source_dir: /backend
+    build_command: npm install
+    run_command: node server.js
+    http_port: 5000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+      - path: /api
+    envs:
+      - key: PORT
+        value: "5000"
+      - key: MONGODB_URI
+        value: ${MONGODB_URI}
+        type: SECRET
+      - key: JWT_SECRET
+        value: ${JWT_SECRET}
+        type: SECRET
+      - key: JWT_EXPIRE
+        value: "30d"
+      - key: GROQ_API_KEY
+        value: ${GROQ_API_KEY}
+        type: SECRET
+      - key: NODE_ENV
+        value: "production"
+
+# Frontend Service
+static_sites:
+  - name: frontend
+    github:
+      repo: YOUR_GITHUB_USERNAME/dot_coder_notebook
+      branch: main
+      deploy_on_push: true
+    source_dir: /frontend
+    build_command: npm install && npm run build
+    output_dir: /dist
+    routes:
+      - path: /
+    envs:
+      - key: VITE_API_URL
+        value: ${backend.PUBLIC_URL}

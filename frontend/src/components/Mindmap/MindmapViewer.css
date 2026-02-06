@@ -1,0 +1,104 @@
+.mindmap-container {
+    animation: fadeIn var(--transition-base);
+}
+
+.mindmap-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+}
+
+.mindmap-header h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.mindmap-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.mindmap-canvas {
+    height: 500px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+/* Empty State */
+.mindmap-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+}
+
+.mindmap-empty-content {
+    text-align: center;
+    max-width: 400px;
+}
+
+.mindmap-empty-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+.mindmap-empty-content h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+}
+
+.mindmap-empty-content p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Spinning Animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* React Flow Overrides */
+.react-flow__node {
+    font-family: var(--font-family);
+}
+
+.react-flow__controls {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+.react-flow__controls-button {
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-subtle);
+    fill: var(--text-secondary);
+}
+
+.react-flow__controls-button:hover {
+    background: var(--bg-hover);
+}
+
+.react-flow__attribution {
+    background: transparent !important;
+}
+
+.react-flow__attribution a {
+    color: var(--text-muted) !important;
+}
