@@ -341,9 +341,14 @@
     background: var(--bg-tertiary);
     border-radius: var(--radius-md);
     min-height: 100px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    overflow-x: hidden;
+    max-width: 100%;
+    white-space: normal;
 }
 
-/* Font Size Rendering - Display */
 .logic-content .ql-size-10px { font-size: 10px; }
 .logic-content .ql-size-12px { font-size: 12px; }
 .logic-content .ql-size-14px { font-size: 14px; }
@@ -355,6 +360,7 @@
 
 .logic-content img {
     max-width: 100%;
+    height: auto;
     border-radius: var(--radius-md);
     margin: var(--spacing-md) 0;
 }
@@ -377,6 +383,7 @@
     padding: var(--spacing-md);
     border-radius: var(--radius-md);
     overflow-x: auto;
+    max-width: 100%;
 }
 
 /* Code Section - Larger */
@@ -500,5 +507,53 @@
 
     .code-modal-header h3 {
         font-size: var(--font-size-base);
+    }
+
+    /* Question item mobile */
+    .question-item .section-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .question-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    .question-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .logic-content {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+        word-break: break-word;
+        overflow-x: hidden;
+    }
+
+    .quill-editor .ql-toolbar.ql-snow {
+        padding: var(--spacing-xs);
+    }
+
+    .quill-editor .ql-toolbar .ql-formats {
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+
+    .quill-editor .ql-container {
+        min-height: 180px;
+    }
+
+    .quill-editor .ql-editor {
+        min-height: 150px;
+    }
+
+    .code-fullscreen {
+        top: 60px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
     }
 }

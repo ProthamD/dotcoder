@@ -102,3 +102,24 @@
 .react-flow__attribution a {
     color: var(--text-muted) !important;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .mindmap-canvas {
+        height: 350px;
+    }
+
+    .mindmap-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    .mindmap-actions {
+        width: 100%;
+    }
+
+    .mindmap-actions .btn {
+        flex: 1;
+    }
+}

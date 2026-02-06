@@ -460,6 +460,33 @@ h6 {
   .grid-cols-2 {
     grid-template-columns: 1fr;
   }
+
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .page {
+    padding: var(--spacing-md) 0;
+    padding-top: calc(var(--navbar-height) + var(--spacing-md));
+  }
+
+  .page-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .page-description {
+    font-size: var(--font-size-base);
+  }
+
+  .modal {
+    margin: var(--spacing-md);
+    max-height: 90vh;
+  }
+
+  .btn {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-xs);
+  }
 }
 
 /* ===== Animations ===== */

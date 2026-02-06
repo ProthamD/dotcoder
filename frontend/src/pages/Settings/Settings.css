@@ -114,3 +114,25 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 0;
+    }
+
+    .profile-info {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    .settings-card {
+        padding: var(--spacing-md);
+    }
+}
