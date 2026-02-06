@@ -147,8 +147,36 @@
     color: var(--text-primary);
 }
 
+/* Mobile backdrop overlay */
+.mobile-backdrop {
+    display: none;
+}
+
 /* ===== Mobile Responsive ===== */
 @media (max-width: 768px) {
+    .mobile-backdrop {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 200;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .navbar {
+        z-index: 210;
+    }
+
     .mobile-menu-toggle {
         display: flex;
         width: 42px;
@@ -167,50 +195,32 @@
         border-color: rgba(255, 152, 67, 0.3);
     }
 
-    /* Glass overlay backdrop */
     .navbar-links {
         position: fixed;
         top: 0;
         right: 0;
         bottom: 0;
         width: 280px;
-        background: rgba(18, 18, 28, 0.75);
+        height: 100vh;
+        height: 100dvh;
+        background: rgba(15, 15, 25, 0.92);
         backdrop-filter: blur(40px) saturate(180%);
         -webkit-backdrop-filter: blur(40px) saturate(180%);
         border-left: 1px solid rgba(255, 255, 255, 0.08);
         flex-direction: column;
         align-items: stretch;
         justify-content: flex-start;
-        padding: calc(var(--navbar-height) + 24px) 20px 24px;
+        padding: 88px 20px 24px;
         gap: 4px;
         transform: translateX(100%);
         transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 105;
+        z-index: 220;
         overflow-y: auto;
         box-shadow: -20px 0 60px rgba(0, 0, 0, 0.5);
     }
 
     .navbar-links.mobile-open {
         transform: translateX(0);
-    }
-
-    /* Glass backdrop overlay */
-    .navbar-links::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: -100vw;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.35s ease;
-    }
-
-    .navbar-links.mobile-open::before {
-        opacity: 1;
-        pointer-events: auto;
     }
 
     .nav-link {

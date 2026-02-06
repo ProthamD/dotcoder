@@ -357,10 +357,16 @@
 .blog-detail-content h1,
 .blog-detail-content h2,
 .blog-detail-content h3 {
-    margin-top: 1.5em;
-    margin-bottom: 0.6em;
-    color: #e2e8f0;
-    font-weight: 600;
+    margin-top: 1.8em;
+    margin-bottom: 0.8em;
+    color: #f1f5f9;
+    font-weight: 700;
+    padding-bottom: 0.5em;
+    border-bottom: 3px solid transparent;
+    background-image: linear-gradient(90deg, #3b82f6 0%, #06b6d4 40%, #8b5cf6 70%, #3b82f6 100%);
+    background-size: 100% 3px;
+    background-position: bottom;
+    background-repeat: no-repeat;
 }
 
 .blog-detail-content h1 { font-size: 1.8rem; }
