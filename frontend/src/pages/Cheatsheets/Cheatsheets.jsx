@@ -1,7 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
-import { Plus, FileText, Trash2, Edit3, ChevronDown, ChevronUp, X, Check } from 'lucide-react';
+import ReactQuill, { Quill } from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
+import { Plus, FileText, Trash2, Edit3, ChevronDown, ChevronUp, X, Check, Link } from 'lucide-react';
 import './Cheatsheets.css';
+
+// Register custom font sizes with Quill
+const Size = Quill.import('attributors/style/size');
+Size.whitelist = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px'];
+Quill.register(Size, true);
 
 const Cheatsheets = () => {
     const [cheatsheets, setCheatsheets] = useState([]);
@@ -12,6 +19,33 @@ const Cheatsheets = () => {
     const [editingItem, setEditingItem] = useState(null);
     const [editTitle, setEditTitle] = useState('');
     const [editContent, setEditContent] = useState('');
+    const [editQuestionLinks, setEditQuestionLinks] = useState('');
+    const [editAnswerLinks, setEditAnswerLinks] = useState('');
+
+    // Quill toolbar with font sizes like Google Docs
+    const quillModules = useMemo(() => ({
+        toolbar: [
+            [{ 'header': [1, 2, 3, false] }],
+            [{ 'size': ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px'] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            [{ 'indent': '-1' }, { 'indent': '+1' }],
+            [{ 'align': [] }],
+            ['link'],
+            ['code-block'],
+            ['clean']
+        ],
+    }), []);
+
+    const quillFormats = [
+        'header', 'size',
+        'bold', 'italic', 'underline', 'strike',
+        'color', 'background',
+        'list', 'bullet', 'indent', 'align',
+        'link',
+        'code-block'
+    ];
 
     useEffect(() => {
         fetchCheatsheets();
@@ -76,7 +110,9 @@ const Cheatsheets = () => {
     const handleEditItem = (item) => {
         setEditingItem(item._id);
         setEditTitle(item.title);
-        setEditContent(item.content);
+        setEditContent(item.content || '');
+        setEditQuestionLinks(item.questionLinks || '');
+        setEditAnswerLinks(item.answerLinks || '');
         setExpandedItems(prev => ({ ...prev, [item._id]: true }));
     };
 
@@ -86,13 +122,16 @@ const Cheatsheets = () => {
         try {
             const res = await api.put(`/cheatsheets/${selectedSheet._id}/items/${itemId}`, {
                 title: editTitle,
-                content: editContent
+                content: editContent,
+                questionLinks: editQuestionLinks,
+                answerLinks: editAnswerLinks
             });
             
-            // Update state in correct order
             setEditingItem(null);
             setEditTitle('');
             setEditContent('');
+            setEditQuestionLinks('');
+            setEditAnswerLinks('');
             setSelectedSheet(res.data.data);
             setCheatsheets(cheatsheets.map(c =>
                 c._id === selectedSheet._id ? res.data.data : c
@@ -106,6 +145,8 @@ const Cheatsheets = () => {
         setEditingItem(null);
         setEditTitle('');
         setEditContent('');
+        setEditQuestionLinks('');
+        setEditAnswerLinks('');
     };
 
     const handleDeleteCheatsheet = async (id) => {
@@ -128,6 +169,27 @@ const Cheatsheets = () => {
             ...prev,
             [itemId]: !prev[itemId]
         }));
+    };
+
+    // Render links as clickable
+    const renderLinks = (linksText) => {
+        if (!linksText) return <span className="text-muted">No links added</span>;
+        const lines = linksText.split('\n').filter(l => l.trim());
+        if (lines.length === 0) return <span className="text-muted">No links added</span>;
+        return lines.map((line, i) => {
+            const trimmed = line.trim();
+            const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://');
+            return (
+                <div key={i} className="link-item">
+                    <Link size={12} />
+                    {isUrl ? (
+                        <a href={trimmed} target="_blank" rel="noopener noreferrer">{trimmed}</a>
+                    ) : (
+                        <span>{trimmed}</span>
+                    )}
+                </div>
+            );
+        });
     };
 
     return (
@@ -320,16 +382,64 @@ const Cheatsheets = () => {
                                                     </div>
                                                     {expandedItems[item._id] && (
                                                         <div className="item-content">
+                                                            {/* Content Section */}
                                                             {editingItem === item._id ? (
-                                                                <textarea
-                                                                    className="item-edit-content"
-                                                                    value={editContent}
-                                                                    onChange={(e) => setEditContent(e.target.value)}
-                                                                    rows={5}
-                                                                />
+                                                                <div className="item-editor">
+                                                                    <label className="item-section-label">Content</label>
+                                                                    <ReactQuill
+                                                                        theme="snow"
+                                                                        value={editContent}
+                                                                        onChange={setEditContent}
+                                                                        modules={quillModules}
+                                                                        formats={quillFormats}
+                                                                        placeholder="Write your content here... Use the toolbar for bold, italic, font sizes, and more!"
+                                                                        className="quill-editor cheatsheet-quill"
+                                                                    />
+                                                                </div>
                                                             ) : (
-                                                                item.content || 'No content'
+                                                                <div
+                                                                    className="item-content-display ql-editor"
+                                                                    dangerouslySetInnerHTML={{
+                                                                        __html: item.content || '<span class="text-muted">No content added yet. Click edit to add.</span>'
+                                                                    }}
+                                                                />
                                                             )}
+
+                                                            {/* Question & Answer Links */}
+                                                            <div className="item-links-section">
+                                                                <div className="item-links-box">
+                                                                    <h5 className="links-box-title">📝 Question Links</h5>
+                                                                    {editingItem === item._id ? (
+                                                                        <textarea
+                                                                            className="links-textarea"
+                                                                            value={editQuestionLinks}
+                                                                            onChange={(e) => setEditQuestionLinks(e.target.value)}
+                                                                            placeholder="Paste question links here (one per line)..."
+                                                                            rows={3}
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="links-display">
+                                                                            {renderLinks(item.questionLinks)}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div className="item-links-box">
+                                                                    <h5 className="links-box-title">✅ Answer Links</h5>
+                                                                    {editingItem === item._id ? (
+                                                                        <textarea
+                                                                            className="links-textarea"
+                                                                            value={editAnswerLinks}
+                                                                            onChange={(e) => setEditAnswerLinks(e.target.value)}
+                                                                            placeholder="Paste answer/solution links here (one per line)..."
+                                                                            rows={3}
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="links-display">
+                                                                            {renderLinks(item.answerLinks)}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -393,7 +503,7 @@ const AddItemForm = ({ onAdd }) => {
             />
             <textarea
                 className="input"
-                placeholder="Content (optional)"
+                placeholder="Content (optional - you can add rich content after creating)"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={2}

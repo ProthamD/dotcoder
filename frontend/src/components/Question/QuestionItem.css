@@ -277,15 +277,81 @@
     fill: var(--text-primary);
 }
 
+/* Font Size Picker Labels */
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-label::before,
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-item::before {
+    content: 'Size';
+}
+
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="10px"]::before,
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before {
+    content: '10px';
+}
+
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="12px"]::before,
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before {
+    content: '12px';
+}
+
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="14px"]::before,
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before {
+    content: '14px';
+}
+
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="16px"]::before,
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="16px"]::before {
+    content: '16px';
+}
+
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="18px"]::before,
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before {
+    content: '18px';
+}
+
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="20px"]::before,
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="20px"]::before {
+    content: '20px';
+}
+
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="24px"]::before,
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before {
+    content: '24px';
+}
+
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="32px"]::before,
+.quill-editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before {
+    content: '32px';
+}
+
+/* Font Size Rendering - Editor */
+.quill-editor .ql-editor .ql-size-10px { font-size: 10px; }
+.quill-editor .ql-editor .ql-size-12px { font-size: 12px; }
+.quill-editor .ql-editor .ql-size-14px { font-size: 14px; }
+.quill-editor .ql-editor .ql-size-16px { font-size: 16px; }
+.quill-editor .ql-editor .ql-size-18px { font-size: 18px; }
+.quill-editor .ql-editor .ql-size-20px { font-size: 20px; }
+.quill-editor .ql-editor .ql-size-24px { font-size: 24px; }
+.quill-editor .ql-editor .ql-size-32px { font-size: 32px; }
+
 /* Logic Content Display */
 .logic-content {
     font-size: var(--font-size-base);
-    line-height: 1.7;
-    padding: var(--spacing-md);
+    line-height: 1.9;
+    padding: var(--spacing-lg);
     background: var(--bg-tertiary);
     border-radius: var(--radius-md);
     min-height: 100px;
 }
+
+/* Font Size Rendering - Display */
+.logic-content .ql-size-10px { font-size: 10px; }
+.logic-content .ql-size-12px { font-size: 12px; }
+.logic-content .ql-size-14px { font-size: 14px; }
+.logic-content .ql-size-16px { font-size: 16px; }
+.logic-content .ql-size-18px { font-size: 18px; }
+.logic-content .ql-size-20px { font-size: 20px; }
+.logic-content .ql-size-24px { font-size: 24px; }
+.logic-content .ql-size-32px { font-size: 32px; }
 
 .logic-content img {
     max-width: 100%;

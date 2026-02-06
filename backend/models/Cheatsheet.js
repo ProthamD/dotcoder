@@ -10,6 +10,14 @@ const cheatsheetItemSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    questionLinks: {
+        type: String,
+        default: ''
+    },
+    answerLinks: {
+        type: String,
+        default: ''
+    },
     tags: [{
         type: String,
         trim: true

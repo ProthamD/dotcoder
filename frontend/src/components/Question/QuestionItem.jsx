@@ -1,7 +1,12 @@
 import { useState, useMemo } from 'react';
 import Editor from '@monaco-editor/react';
-import ReactQuill from 'react-quill-new';
+import ReactQuill, { Quill } from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+
+// Register custom font sizes with Quill
+const Size = Quill.import('attributors/style/size');
+Size.whitelist = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px'];
+Quill.register(Size, true);
 import {
     ChevronDown,
     ChevronUp,
@@ -36,10 +41,12 @@ const QuestionItem = ({
     const quillModules = useMemo(() => ({
         toolbar: [
             [{ 'header': [1, 2, 3, false] }],
+            [{ 'size': ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px'] }],
             ['bold', 'italic', 'underline', 'strike'],
             [{ 'color': [] }, { 'background': [] }],
             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
             [{ 'indent': '-1' }, { 'indent': '+1' }],
+            [{ 'align': [] }],
             ['link', 'image'],
             ['code-block'],
             ['clean']
@@ -47,10 +54,10 @@ const QuestionItem = ({
     }), []);
 
     const quillFormats = [
-        'header',
+        'header', 'size',
         'bold', 'italic', 'underline', 'strike',
         'color', 'background',
-        'list', 'bullet', 'indent',
+        'list', 'bullet', 'indent', 'align',
         'link', 'image',
         'code-block'
     ];
