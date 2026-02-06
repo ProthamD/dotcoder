@@ -543,15 +543,75 @@
 
     .cheatsheets-layout {
         grid-template-columns: 1fr;
+        gap: var(--spacing-md);
     }
 
     .cheatsheets-sidebar {
         position: relative;
+        background: rgba(18, 18, 28, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
     }
 
     .cheatsheets-sidebar .sidebar-list {
-        max-height: 200px;
-        overflow-y: auto;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 8px;
+        gap: 6px;
+        max-height: none;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .cheatsheets-sidebar .sidebar-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cheatsheets-sidebar .sidebar-item {
+        flex: 0 0 auto;
+        padding: 8px 14px;
+        border-radius: 10px;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        transition: all 0.2s ease;
+    }
+
+    .cheatsheets-sidebar .sidebar-item.active {
+        background: rgba(255, 152, 67, 0.12);
+        border-color: rgba(255, 152, 67, 0.2);
+    }
+
+    .cheatsheets-sidebar .sidebar-item-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+    }
+
+    .cheatsheets-sidebar .sidebar-item-info {
+        min-width: 0;
+    }
+
+    .cheatsheets-sidebar .sidebar-item-title {
+        font-size: 13px;
+        max-width: 120px;
+    }
+
+    .cheatsheets-sidebar .sidebar-item-count {
+        font-size: 11px;
+    }
+
+    .sidebar-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .sidebar-header h3 {
+        font-size: 12px;
     }
 
     .mobile-sidebar-toggle {
@@ -559,44 +619,65 @@
     }
 
     .cheatsheets-content {
-        padding: var(--spacing-md);
+        padding: 16px;
+        background: rgba(18, 18, 28, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
     }
 
     .content-header {
         flex-direction: column;
         gap: var(--spacing-md);
+        padding-bottom: 12px;
+        margin-bottom: 16px;
     }
 
     .content-title-section {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .content-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .content-title-section h2 {
+        font-size: 16px;
     }
 
     .add-item-form {
         min-width: 100%;
     }
 
+    .cheatsheet-item {
+        border-radius: 12px;
+    }
+
     .item-header {
-        padding: var(--spacing-sm) var(--spacing-md);
-        flex-wrap: wrap;
-        gap: var(--spacing-sm);
+        padding: 12px 14px;
+        gap: 8px;
     }
 
     .item-header h4 {
-        font-size: var(--font-size-sm);
+        font-size: 14px;
         flex: 1;
         min-width: 0;
         word-break: break-word;
     }
 
     .item-content {
-        padding: var(--spacing-md);
-        padding-top: var(--spacing-xs);
+        padding: 14px;
+        padding-top: 4px;
     }
 
     .item-content-display {
-        padding: var(--spacing-md);
-        font-size: var(--font-size-sm);
+        padding: 14px;
+        font-size: 14px;
+        border-radius: 10px;
     }
 
     .item-links-section {
@@ -615,9 +696,9 @@
         min-height: 130px;
     }
 
-    /* Quill toolbar wrap on mobile */
     .cheatsheet-quill .ql-toolbar.ql-snow {
-        padding: var(--spacing-xs);
+        padding: 6px;
+        border-radius: 10px 10px 0 0;
     }
 
     .cheatsheet-quill .ql-toolbar .ql-formats {
@@ -627,31 +708,35 @@
 
     .item-actions .btn {
         padding: 6px 10px !important;
-        min-width: 60px !important;
+        min-width: auto !important;
         font-size: 12px !important;
     }
 }
 
 @media (max-width: 480px) {
     .cheatsheets-content {
-        padding: var(--spacing-sm);
+        padding: 12px;
     }
 
     .item-content-display {
-        padding: var(--spacing-sm);
+        padding: 12px;
     }
 
     .item-header {
-        padding: var(--spacing-xs) var(--spacing-sm);
+        padding: 10px 12px;
     }
 
     .item-content {
-        padding: var(--spacing-sm);
+        padding: 12px;
     }
 
     .content-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 1.2rem;
+        width: 34px;
+        height: 34px;
+        font-size: 1.1rem;
+    }
+
+    .content-title-section h2 {
+        font-size: 15px;
     }
 }
