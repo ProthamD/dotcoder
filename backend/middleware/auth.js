@@ -47,3 +47,15 @@ export const generateToken = (id) => {
         expiresIn: process.env.JWT_EXPIRE
     });
 };
+
+// Admin only middleware - must be used AFTER protect
+export const adminOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        return res.status(403).json({
+            success: false,
+            message: 'Admin access required'
+        });
+    }
+};

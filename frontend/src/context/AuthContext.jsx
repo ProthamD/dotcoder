@@ -73,7 +73,8 @@ export const AuthProvider = ({ children }) => {
                 register,
                 logout,
                 updateSettings,
-                isAuthenticated: !!user
+                isAuthenticated: !!user,
+                isAdmin: user?.role === 'admin'
             }}
         >
             {children}

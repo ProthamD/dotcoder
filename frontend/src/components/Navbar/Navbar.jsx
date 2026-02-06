@@ -9,6 +9,7 @@ import {
     User,
     Sparkles,
     MessageSquare,
+    BookOpen,
     Menu,
     X
 } from 'lucide-react';
@@ -77,6 +78,14 @@ const Navbar = () => {
                     >
                         <FileText size={18} />
                         <span>Cheatsheets</span>
+                    </Link>
+                    <Link
+                        to="/blogs"
+                        className={`nav-link ${isActive('/blogs') || location.pathname.startsWith('/blogs/') ? 'active' : ''}`}
+                        onClick={handleNavClick}
+                    >
+                        <BookOpen size={18} />
+                        <span>Blogs</span>
                     </Link>
 
                     {/* Mobile-only user actions */}

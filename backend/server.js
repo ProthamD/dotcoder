@@ -11,6 +11,7 @@ import questionRoutes from './routes/questions.js';
 import cheatsheetRoutes from './routes/cheatsheets.js';
 import aiRoutes from './routes/ai.js';
 import threadRoutes from './routes/threads.js';
+import blogRoutes from './routes/blogs.js';
 
 // Load env vars
 dotenv.config();
@@ -42,6 +43,7 @@ app.use('/api/questions', questionRoutes);
 app.use('/api/cheatsheets', cheatsheetRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/threads', threadRoutes);
+app.use('/api/blogs', blogRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

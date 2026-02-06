@@ -9,6 +9,10 @@ import Cheatsheets from './pages/Cheatsheets/Cheatsheets';
 import Settings from './pages/Settings/Settings';
 import Discussion from './pages/Discussion/Discussion';
 import ThreadDetail from './pages/Discussion/ThreadDetail';
+import Blogs from './pages/Blog/Blogs';
+import BlogDetail from './pages/Blog/BlogDetail';
+import WriteBlog from './pages/Blog/WriteBlog';
+import AdminBlogs from './pages/Blog/AdminBlogs';
 import './index.css';
 
 // Protected Route Component
@@ -129,6 +133,46 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <Settings />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/blogs"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Blogs />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/blogs/write"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <WriteBlog />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/blogs/:id"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <BlogDetail />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/blogs"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <AdminBlogs />
             </AppLayout>
           </ProtectedRoute>
         }

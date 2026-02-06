@@ -37,6 +37,7 @@ router.post('/register', async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                role: user.role,
                 settings: user.settings,
                 token
             }
@@ -93,6 +94,7 @@ router.post('/login', async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                role: user.role,
                 settings: user.settings,
                 token
             }
@@ -140,6 +142,29 @@ router.put('/settings', protect, async (req, res) => {
         res.status(200).json({
             success: true,
             data: user
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// @desc    Promote current user to admin (one-time setup, remove after use)
+// @route   PUT /api/auth/setup-admin
+// @access  Private
+router.put('/setup-admin', protect, async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { role: 'admin' },
+            { new: true }
+        );
+        res.status(200).json({
+            success: true,
+            message: 'You are now admin',
+            data: { role: user.role }
         });
     } catch (error) {
         res.status(500).json({
