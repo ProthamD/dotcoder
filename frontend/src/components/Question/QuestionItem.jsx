@@ -138,15 +138,24 @@ const QuestionItem = ({
 
                     <div className="question-actions" onClick={(e) => e.stopPropagation()}>
                         {question.link ? (
-                            <a
-                                href={question.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-ghost btn-icon btn-sm question-link-btn"
-                                title="Open question link"
-                            >
-                                <ExternalLink size={16} />
-                            </a>
+                            <div className="question-link-group">
+                                <a
+                                    href={question.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-ghost btn-icon btn-sm question-link-btn"
+                                    title="Open question link"
+                                >
+                                    <ExternalLink size={16} />
+                                </a>
+                                <button
+                                    className="btn btn-ghost btn-icon btn-sm question-link-edit-btn"
+                                    onClick={() => { setEditingLink(true); setExpanded(true); }}
+                                    title="Edit link"
+                                >
+                                    <Edit3 size={12} />
+                                </button>
+                            </div>
                         ) : (
                             <button
                                 className="btn btn-ghost btn-icon btn-sm question-link-btn-empty"
