@@ -143,44 +143,44 @@ const QuestionItem = ({
                                     href={question.link}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="btn btn-ghost btn-icon btn-sm question-link-btn"
+                                    className="question-action-btn question-link-btn"
                                     title="Open question link"
                                 >
-                                    <ExternalLink size={16} />
+                                    <ExternalLink size={18} />
                                 </a>
                                 <button
-                                    className="btn btn-ghost btn-icon btn-sm question-link-edit-btn"
+                                    className="question-action-btn question-link-edit-btn"
                                     onClick={() => { setEditingLink(true); setExpanded(true); }}
                                     title="Edit link"
                                 >
-                                    <Edit3 size={12} />
+                                    <Edit3 size={14} />
                                 </button>
                             </div>
                         ) : (
                             <button
-                                className="btn btn-ghost btn-icon btn-sm question-link-btn-empty"
+                                className="question-action-btn question-link-btn-empty"
                                 onClick={() => { setEditingLink(true); setExpanded(true); }}
                                 title="Add link"
                             >
-                                <ExternalLink size={16} />
+                                <ExternalLink size={18} />
                             </button>
                         )}
                         <button
-                            className="btn btn-ghost btn-icon btn-sm"
+                            className="question-action-btn"
                             onClick={() => setEditingTitle(true)}
                             title="Edit title"
                         >
-                            <Edit3 size={16} />
+                            <Edit3 size={18} />
                         </button>
                         <button
-                            className="btn btn-ghost btn-icon btn-sm"
+                            className="question-action-btn question-delete-btn"
                             onClick={onDelete}
                             title="Delete"
                         >
-                            <Trash2 size={16} />
+                            <Trash2 size={18} />
                         </button>
-                        <button className="btn btn-ghost btn-icon">
-                            {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                        <button className="question-action-btn question-expand-btn">
+                            {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                         </button>
                     </div>
                 </div>

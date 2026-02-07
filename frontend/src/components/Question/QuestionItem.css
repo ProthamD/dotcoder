@@ -102,15 +102,50 @@
     gap: var(--spacing-xs);
 }
 
+/* Question Action Buttons */
+.question-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.question-action-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.question-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+}
+
+.question-expand-btn {
+    color: var(--text-muted);
+}
+
+.question-expand-btn:hover {
+    color: var(--text-primary);
+}
+
 /* Question Link Buttons */
 .question-link-group {
     display: flex;
     align-items: center;
-    position: relative;
+    gap: 2px;
 }
 
 .question-link-btn {
     color: #60a5fa !important;
+    text-decoration: none;
 }
 
 .question-link-btn:hover {
@@ -119,17 +154,10 @@
 }
 
 .question-link-edit-btn {
+    width: 28px !important;
+    height: 28px !important;
     color: var(--text-muted) !important;
-    opacity: 0;
-    margin-left: -4px;
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-    transition: opacity 0.2s ease;
-}
-
-.question-link-group:hover .question-link-edit-btn {
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
 .question-link-edit-btn:hover {
@@ -140,13 +168,13 @@
 
 .question-link-btn-empty {
     color: var(--text-muted) !important;
-    opacity: 0.5;
+    opacity: 0.4;
 }
 
 .question-link-btn-empty:hover {
     opacity: 1;
     color: #60a5fa !important;
-    background: rgba(96, 165, 250, 0.1) !important;
+    background: rgba(96, 165, 250, 0.12) !important;
 }
 
 /* Link Edit Row */
@@ -596,6 +624,18 @@
     .question-actions {
         width: 100%;
         justify-content: flex-end;
+        gap: 2px;
+    }
+
+    .question-action-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .question-link-edit-btn {
+        width: 32px !important;
+        height: 32px !important;
+        opacity: 0.8;
     }
 
     .logic-content {
