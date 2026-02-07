@@ -20,6 +20,7 @@
     mask-composite: exclude;
     opacity: 0;
     transition: opacity var(--transition-base);
+    pointer-events: none;
 }
 
 .chapter-card:hover {
@@ -66,6 +67,13 @@
 /* Menu */
 .chapter-menu {
     position: relative;
+    z-index: 20;
+}
+
+.chapter-menu-btn {
+    position: relative;
+    z-index: 21;
+    cursor: pointer;
 }
 
 .chapter-menu-dropdown {
@@ -78,8 +86,9 @@
     border-radius: var(--radius-md);
     padding: var(--spacing-xs);
     min-width: 140px;
-    z-index: 10;
+    z-index: 100;
     animation: slideDown var(--transition-fast);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .menu-item {

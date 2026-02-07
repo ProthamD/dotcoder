@@ -1,22 +1,56 @@
 import { MoreVertical, Trash2, Edit3, BookOpen } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './ChapterCard.css';
 
-const GRADIENT_COLORS = [
-    'linear-gradient(135deg, #ff9843 0%, #ffdd95 100%)', // Orange-Yellow
-    'linear-gradient(135deg, #86a7fc 0%, #a8c5ff 100%)', // Blue
-    'linear-gradient(135deg, #ff9843 0%, #86a7fc 100%)', // Orange-Blue
-    'linear-gradient(135deg, #ffdd95 0%, #86a7fc 100%)', // Yellow-Blue
-    'linear-gradient(135deg, #ffb366 0%, #ffc989 100%)', // Orange shades
-    'linear-gradient(135deg, #86a7fc 0%, #d4e4ff 100%)', // Blue shades
-];
+const GRADIENT_PRESETS = {
+    'default': 'linear-gradient(135deg, #ff9843 0%, #ffdd95 100%)',
+    '#ff9843': 'linear-gradient(135deg, #ff9843 0%, #ffdd95 100%)',
+    '#7c3aed': 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+    '#3b82f6': 'linear-gradient(135deg, #3b82f6 0%, #93c5fd 100%)',
+    '#06b6d4': 'linear-gradient(135deg, #06b6d4 0%, #67e8f9 100%)',
+    '#10b981': 'linear-gradient(135deg, #10b981 0%, #6ee7b7 100%)',
+    '#f97316': 'linear-gradient(135deg, #f97316 0%, #fdba74 100%)',
+    '#ec4899': 'linear-gradient(135deg, #ec4899 0%, #f9a8d4 100%)',
+    '#f43f5e': 'linear-gradient(135deg, #f43f5e 0%, #fda4af 100%)',
+    '#8b5cf6': 'linear-gradient(135deg, #8b5cf6 0%, #c4b5fd 100%)',
+    '#6366f1': 'linear-gradient(135deg, #6366f1 0%, #a5b4fc 100%)',
+    'gradient-sunset': 'linear-gradient(135deg, #ff9843 0%, #ec4899 100%)',
+    'gradient-ocean': 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)',
+    'gradient-forest': 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+    'gradient-purple': 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
+    'gradient-fire': 'linear-gradient(135deg, #f43f5e 0%, #f97316 100%)',
+    'gradient-aurora': 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%)',
+};
+
+const getGradient = (color) => {
+    if (!color) return GRADIENT_PRESETS['default'];
+    if (GRADIENT_PRESETS[color]) return GRADIENT_PRESETS[color];
+    // If it's a raw hex that's not in presets, create a lighter gradient
+    if (color.startsWith('#')) {
+        return `linear-gradient(135deg, ${color} 0%, ${color}88 100%)`;
+    }
+    return GRADIENT_PRESETS['default'];
+};
 
 const ChapterCard = ({ chapter, index, onClick, onDelete }) => {
     const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef(null);
 
-    const gradientStyle = {
-        background: GRADIENT_COLORS[index % GRADIENT_COLORS.length]
-    };
+    const gradient = getGradient(chapter.color);
+    const gradientStyle = { background: gradient };
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setShowMenu(false);
+            }
+        };
+        if (showMenu) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showMenu]);
 
     const handleMenuClick = (e) => {
         e.stopPropagation();
@@ -32,7 +66,7 @@ const ChapterCard = ({ chapter, index, onClick, onDelete }) => {
     return (
         <div
             className="chapter-card animate-slide-up"
-            style={{ animationDelay: `${index * 50} ms` }}
+            style={{ animationDelay: `${index * 50}ms` }}
             onClick={onClick}
         >
             {/* Gradient Accent */}
@@ -44,16 +78,16 @@ const ChapterCard = ({ chapter, index, onClick, onDelete }) => {
                     <div className="chapter-icon" style={gradientStyle}>
                         {chapter.icon || '📚'}
                     </div>
-                    <div className="chapter-menu">
+                    <div className="chapter-menu" ref={menuRef}>
                         <button
-                            className="btn btn-ghost btn-icon"
+                            className="btn btn-ghost btn-icon chapter-menu-btn"
                             onClick={handleMenuClick}
                         >
                             <MoreVertical size={18} />
                         </button>
                         {showMenu && (
                             <div className="chapter-menu-dropdown">
-                                <button className="menu-item">
+                                <button className="menu-item" onClick={(e) => { e.stopPropagation(); setShowMenu(false); onClick(); }}>
                                     <Edit3 size={16} />
                                     Edit
                                 </button>
@@ -93,4 +127,5 @@ const ChapterCard = ({ chapter, index, onClick, onDelete }) => {
     );
 };
 
+export { GRADIENT_PRESETS, getGradient };
 export default ChapterCard;

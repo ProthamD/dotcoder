@@ -16,7 +16,8 @@ import {
     FileText,
     Check,
     X,
-    Tag
+    Tag,
+    ExternalLink
 } from 'lucide-react';
 import './QuestionItem.css';
 
@@ -36,6 +37,8 @@ const QuestionItem = ({
     const [title, setTitle] = useState(question.title);
     const [logic, setLogic] = useState(question.logic?.content || '');
     const [code, setCode] = useState(question.code?.content || '');
+    const [link, setLink] = useState(question.link || '');
+    const [editingLink, setEditingLink] = useState(false);
 
     // Quill toolbar configuration - like Google Docs
     const quillModules = useMemo(() => ({
@@ -134,6 +137,25 @@ const QuestionItem = ({
                     )}
 
                     <div className="question-actions" onClick={(e) => e.stopPropagation()}>
+                        {question.link ? (
+                            <a
+                                href={question.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-ghost btn-icon btn-sm question-link-btn"
+                                title="Open question link"
+                            >
+                                <ExternalLink size={16} />
+                            </a>
+                        ) : (
+                            <button
+                                className="btn btn-ghost btn-icon btn-sm question-link-btn-empty"
+                                onClick={() => { setEditingLink(true); setExpanded(true); }}
+                                title="Add link"
+                            >
+                                <ExternalLink size={16} />
+                            </button>
+                        )}
                         <button
                             className="btn btn-ghost btn-icon btn-sm"
                             onClick={() => setEditingTitle(true)}
@@ -157,6 +179,27 @@ const QuestionItem = ({
                 {/* Expanded Content */}
                 {expanded && (
                     <div className="question-content">
+                        {/* Link editor */}
+                        {editingLink && (
+                            <div className="question-link-edit" onClick={(e) => e.stopPropagation()}>
+                                <ExternalLink size={16} />
+                                <input
+                                    type="url"
+                                    className="input"
+                                    placeholder="Paste question link (e.g. leetcode.com/problems/...)"
+                                    value={link}
+                                    onChange={(e) => setLink(e.target.value)}
+                                    autoFocus
+                                />
+                                <button className="btn btn-ghost btn-icon btn-sm" onClick={() => { onUpdate({ link }); setEditingLink(false); }}>
+                                    <Check size={16} />
+                                </button>
+                                <button className="btn btn-ghost btn-icon btn-sm" onClick={() => setEditingLink(false)}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+                        )}
+
                         {/* Action Buttons */}
                         <div className="question-toggles">
                             <button

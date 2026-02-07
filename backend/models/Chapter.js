@@ -23,7 +23,7 @@ const chapterSchema = new mongoose.Schema({
     },
     color: {
         type: String,
-        default: '#6366f1' // Purple gradient default
+        default: '' // Empty = golden/orange default gradient
     },
     icon: {
         type: String,

@@ -6,12 +6,20 @@ const COLOR_OPTIONS = [
     '#7c3aed', '#3b82f6', '#06b6d4', '#10b981',
     '#f97316', '#ec4899', '#8b5cf6', '#f43f5e'
 ];
+const GRADIENT_OPTIONS = [
+    { id: 'gradient-sunset', label: 'Sunset', gradient: 'linear-gradient(135deg, #ff9843 0%, #ec4899 100%)' },
+    { id: 'gradient-ocean', label: 'Ocean', gradient: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)' },
+    { id: 'gradient-forest', label: 'Forest', gradient: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)' },
+    { id: 'gradient-purple', label: 'Purple', gradient: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)' },
+    { id: 'gradient-fire', label: 'Fire', gradient: 'linear-gradient(135deg, #f43f5e 0%, #f97316 100%)' },
+    { id: 'gradient-aurora', label: 'Aurora', gradient: 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%)' },
+];
 
 const CreateChapterModal = ({ onClose, onCreate }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [icon, setIcon] = useState('📚');
-    const [color, setColor] = useState('#7c3aed');
+    const [color, setColor] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -87,7 +95,7 @@ const CreateChapterModal = ({ onClose, onCreate }) => {
 
                         <div className="input-group">
                             <label className="input-label">Color</label>
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                                 {COLOR_OPTIONS.map((c) => (
                                     <button
                                         key={c}
@@ -102,6 +110,27 @@ const CreateChapterModal = ({ onClose, onCreate }) => {
                                             cursor: 'pointer',
                                             transition: 'transform var(--transition-fast)',
                                             transform: color === c ? 'scale(1.1)' : 'scale(1)'
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                            <label className="input-label" style={{ marginTop: '8px' }}>Gradients</label>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                {GRADIENT_OPTIONS.map((g) => (
+                                    <button
+                                        key={g.id}
+                                        type="button"
+                                        onClick={() => setColor(g.id)}
+                                        title={g.label}
+                                        style={{
+                                            width: 40,
+                                            height: 32,
+                                            background: g.gradient,
+                                            border: color === g.id ? '3px solid white' : 'none',
+                                            borderRadius: 'var(--radius-sm)',
+                                            cursor: 'pointer',
+                                            transition: 'transform var(--transition-fast)',
+                                            transform: color === g.id ? 'scale(1.1)' : 'scale(1)'
                                         }}
                                     />
                                 ))}

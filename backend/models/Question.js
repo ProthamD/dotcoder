@@ -45,6 +45,10 @@ const questionSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    link: {
+        type: String,
+        default: ''
+    },
     tags: [{
         type: String,
         trim: true
