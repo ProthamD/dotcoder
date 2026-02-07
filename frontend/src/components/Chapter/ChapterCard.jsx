@@ -32,7 +32,7 @@ const getGradient = (color) => {
     return GRADIENT_PRESETS['default'];
 };
 
-const ChapterCard = ({ chapter, index, onClick, onDelete }) => {
+const ChapterCard = ({ chapter, index, onClick, onDelete, onEdit }) => {
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
 
@@ -87,7 +87,7 @@ const ChapterCard = ({ chapter, index, onClick, onDelete }) => {
                         </button>
                         {showMenu && (
                             <div className="chapter-menu-dropdown">
-                                <button className="menu-item" onClick={(e) => { e.stopPropagation(); setShowMenu(false); onClick(); }}>
+                                <button className="menu-item" onClick={(e) => { e.stopPropagation(); setShowMenu(false); onEdit && onEdit(); }}>
                                     <Edit3 size={16} />
                                     Edit
                                 </button>

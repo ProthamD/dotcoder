@@ -10,6 +10,7 @@ const Home = () => {
     const [chapters, setChapters] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [editingChapter, setEditingChapter] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -34,6 +35,16 @@ const Home = () => {
             setShowCreateModal(false);
         } catch (error) {
             console.error('Error creating chapter:', error);
+        }
+    };
+
+    const handleEditChapter = async (chapterId, chapterData) => {
+        try {
+            const res = await api.put(`/chapters/${chapterId}`, chapterData);
+            setChapters(chapters.map(c => c._id === chapterId ? res.data.data : c));
+            setEditingChapter(null);
+        } catch (error) {
+            console.error('Error updating chapter:', error);
         }
     };
 
@@ -143,6 +154,7 @@ const Home = () => {
                                 index={index}
                                 onClick={() => handleChapterClick(chapter._id)}
                                 onDelete={() => handleDeleteChapter(chapter._id)}
+                                onEdit={() => setEditingChapter(chapter)}
                             />
                         ))}
                     </div>
@@ -154,6 +166,15 @@ const Home = () => {
                 <CreateChapterModal
                     onClose={() => setShowCreateModal(false)}
                     onCreate={handleCreateChapter}
+                />
+            )}
+
+            {/* Edit Chapter Modal */}
+            {editingChapter && (
+                <CreateChapterModal
+                    chapter={editingChapter}
+                    onClose={() => setEditingChapter(null)}
+                    onCreate={(data) => handleEditChapter(editingChapter._id, data)}
                 />
             )}
         </div>

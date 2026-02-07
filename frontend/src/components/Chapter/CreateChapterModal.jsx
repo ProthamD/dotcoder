@@ -15,11 +15,12 @@ const GRADIENT_OPTIONS = [
     { id: 'gradient-aurora', label: 'Aurora', gradient: 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%)' },
 ];
 
-const CreateChapterModal = ({ onClose, onCreate }) => {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [icon, setIcon] = useState('📚');
-    const [color, setColor] = useState('');
+const CreateChapterModal = ({ onClose, onCreate, chapter }) => {
+    const isEditing = !!chapter;
+    const [title, setTitle] = useState(chapter?.title || '');
+    const [description, setDescription] = useState(chapter?.description || '');
+    const [icon, setIcon] = useState(chapter?.icon || '📚');
+    const [color, setColor] = useState(chapter?.color || '');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -35,7 +36,7 @@ const CreateChapterModal = ({ onClose, onCreate }) => {
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2 className="modal-title">Create New Chapter</h2>
+                    <h2 className="modal-title">{isEditing ? 'Edit Chapter' : 'Create New Chapter'}</h2>
                     <button className="btn btn-ghost btn-icon" onClick={onClose}>
                         <X size={20} />
                     </button>
@@ -151,7 +152,7 @@ const CreateChapterModal = ({ onClose, onCreate }) => {
                             className="btn btn-primary"
                             disabled={loading || !title.trim()}
                         >
-                            {loading ? 'Creating...' : 'Create Chapter'}
+                            {loading ? (isEditing ? 'Saving...' : 'Creating...') : (isEditing ? 'Save Changes' : 'Create Chapter')}
                         </button>
                     </div>
                 </form>
