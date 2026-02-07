@@ -80,7 +80,7 @@ router.get('/:id', protect, async (req, res) => {
 // @access  Private
 router.post('/', protect, async (req, res) => {
     try {
-        const { chapterId, title, logic, code, tags, difficulty } = req.body;
+        const { chapterId, title, logic, code, tags, difficulty, link } = req.body;
 
         const chapter = await Chapter.findById(chapterId);
 
@@ -109,6 +109,7 @@ router.post('/', protect, async (req, res) => {
             user: req.user.id,
             logic: logic || { content: '', isVisible: true },
             code: code || { content: '', language: 'javascript', isVisible: true },
+            link: link || '',
             tags,
             difficulty,
             order: maxOrder ? maxOrder.order + 1 : 0
