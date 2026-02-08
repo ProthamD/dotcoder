@@ -272,6 +272,12 @@
     color: var(--text-secondary);
 }
 
+.section-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
 /* Logic Editor */
 .logic-editor {
     display: flex;

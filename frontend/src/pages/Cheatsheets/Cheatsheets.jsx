@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import api from '../../services/api';
 import ReactQuill, { Quill } from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-import { Plus, FileText, Trash2, Edit3, ChevronDown, ChevronUp, X, Check, Link } from 'lucide-react';
+import { Plus, FileText, Trash2, Edit3, ChevronDown, ChevronUp, X, Check, Link, Download } from 'lucide-react';
+import { exportCheatsheetItemToPdf } from '../../utils/exportPdf';
 import './Cheatsheets.css';
 
 // Register custom font sizes with Quill
@@ -351,6 +352,16 @@ const Cheatsheets = () => {
                                                                 </>
                                                             ) : (
                                                                 <>
+                                                                    <button
+                                                                        className="btn btn-ghost btn-icon btn-sm"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            exportCheatsheetItemToPdf(item, selectedSheet.title);
+                                                                        }}
+                                                                        title="Export as PDF"
+                                                                    >
+                                                                        <Download size={14} />
+                                                                    </button>
                                                                     <button
                                                                         className="btn btn-ghost btn-icon btn-sm"
                                                                         onClick={(e) => {

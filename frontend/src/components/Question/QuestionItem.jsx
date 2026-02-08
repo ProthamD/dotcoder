@@ -17,8 +17,10 @@ import {
     Check,
     X,
     Tag,
-    ExternalLink
+    ExternalLink,
+    Download
 } from 'lucide-react';
+import { exportQuestionToPdf } from '../../utils/exportPdf';
 import './QuestionItem.css';
 
 const QuestionItem = ({
@@ -235,13 +237,23 @@ const QuestionItem = ({
                                 <div className="section-header-small">
                                     <h4>Logic / Explanation</h4>
                                     {!editingLogic && (
-                                        <button
-                                            className="btn btn-ghost btn-sm"
-                                            onClick={() => setEditingLogic(true)}
-                                        >
-                                            <Edit3 size={14} />
-                                            Edit
-                                        </button>
+                                        <div className="section-header-actions">
+                                            <button
+                                                className="btn btn-ghost btn-sm"
+                                                onClick={() => exportQuestionToPdf(question)}
+                                                title="Export as PDF"
+                                            >
+                                                <Download size={14} />
+                                                PDF
+                                            </button>
+                                            <button
+                                                className="btn btn-ghost btn-sm"
+                                                onClick={() => setEditingLogic(true)}
+                                            >
+                                                <Edit3 size={14} />
+                                                Edit
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
 
