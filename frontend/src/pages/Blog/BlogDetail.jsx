@@ -172,10 +172,12 @@ const BlogDetail = () => {
                     </div>
 
                     {/* Content */}
-                    <div
-                        className="blog-detail-content ql-editor"
-                        dangerouslySetInnerHTML={{ __html: blog.content }}
-                    />
+                    <div className="ql-snow">
+                        <div
+                            className="blog-detail-content ql-editor"
+                            dangerouslySetInnerHTML={{ __html: blog.content }}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

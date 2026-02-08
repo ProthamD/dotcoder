@@ -60,7 +60,7 @@ const QuestionItem = ({
         'header', 'size',
         'bold', 'italic', 'underline', 'strike',
         'color', 'background',
-        'list', 'bullet', 'indent', 'align',
+        'list', 'indent', 'align',
         'link', 'image',
         'code-block'
     ];
@@ -266,12 +266,14 @@ const QuestionItem = ({
                                         </div>
                                     </div>
                                 ) : (
-                                    <div
-                                        className="logic-content ql-editor"
-                                        dangerouslySetInnerHTML={{
-                                            __html: question.logic?.content || '<span class="text-muted">No explanation added yet. Click Edit to add.</span>'
-                                        }}
-                                    />
+                                    <div className="ql-snow">
+                                        <div
+                                            className="logic-content ql-editor"
+                                            dangerouslySetInnerHTML={{
+                                                __html: question.logic?.content || '<span class="text-muted">No explanation added yet. Click Edit to add.</span>'
+                                            }}
+                                        />
+                                    </div>
                                 )}
                             </div>
                         )}
