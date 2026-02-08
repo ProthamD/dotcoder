@@ -42,7 +42,7 @@ const Cheatsheets = () => {
         'header', 'size',
         'bold', 'italic', 'underline', 'strike',
         'color', 'background',
-        'list', 'bullet', 'indent', 'align',
+        'list', 'indent', 'align',
         'link',
         'code-block'
     ];
@@ -397,12 +397,14 @@ const Cheatsheets = () => {
                                                                     />
                                                                 </div>
                                                             ) : (
-                                                                <div
-                                                                    className="item-content-display ql-editor"
-                                                                    dangerouslySetInnerHTML={{
-                                                                        __html: item.content || '<span class="text-muted">No content added yet. Click edit to add.</span>'
-                                                                    }}
-                                                                />
+                                                                <div className="ql-snow">
+                                                                    <div
+                                                                        className="item-content-display ql-editor"
+                                                                        dangerouslySetInnerHTML={{
+                                                                            __html: item.content || '<span class="text-muted">No content added yet. Click edit to add.</span>'
+                                                                        }}
+                                                                    />
+                                                                </div>
                                                             )}
 
                                                             {/* Question & Answer Links */}

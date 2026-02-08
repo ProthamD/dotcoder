@@ -354,10 +354,41 @@
 .item-content-display ol {
     padding-left: 1.5em;
     margin-bottom: 0.8em;
+    list-style-position: outside;
+}
+
+.item-content-display ul {
+    list-style-type: disc;
+}
+
+.item-content-display ol {
+    list-style-type: decimal;
 }
 
 .item-content-display li {
     margin-bottom: 0.4em;
+    padding-left: 0.3em;
+}
+
+/* Quill list rendering in display mode */
+.item-content-display li[data-list="bullet"] {
+    list-style-type: disc;
+}
+
+.item-content-display li[data-list="ordered"] {
+    list-style-type: decimal;
+}
+
+.item-content-display .ql-indent-1 {
+    padding-left: 3em;
+}
+
+.item-content-display .ql-indent-2 {
+    padding-left: 6em;
+}
+
+.item-content-display .ql-indent-3 {
+    padding-left: 9em;
 }
 
 .item-content-display pre {
