@@ -377,28 +377,10 @@
 .blog-detail-content ol {
     padding-left: 1.5em;
     margin-bottom: 1em;
-    list-style-position: outside;
-}
-
-.blog-detail-content ul {
-    list-style-type: disc;
-}
-
-.blog-detail-content ol {
-    list-style-type: decimal;
 }
 
 .blog-detail-content li {
     margin-bottom: 0.4em;
-    padding-left: 0.3em;
-}
-
-.blog-detail-content li[data-list="bullet"] {
-    list-style-type: disc;
-}
-
-.blog-detail-content li[data-list="ordered"] {
-    list-style-type: decimal;
 }
 
 .blog-detail-content pre {

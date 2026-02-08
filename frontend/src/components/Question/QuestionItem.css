@@ -294,28 +294,10 @@
 .logic-content ul {
     padding-left: 1.5em;
     margin-bottom: 0.8em;
-    list-style-position: outside;
-}
-
-.logic-content ul {
-    list-style-type: disc;
-}
-
-.logic-content ol {
-    list-style-type: decimal;
 }
 
 .logic-content li {
     margin-bottom: 0.4em;
-    padding-left: 0.3em;
-}
-
-.logic-content li[data-list="bullet"] {
-    list-style-type: disc;
-}
-
-.logic-content li[data-list="ordered"] {
-    list-style-type: decimal;
 }
 
 /* Code Editor */

@@ -790,6 +790,113 @@ h6 {
   border-color: var(--border-default);
 }
 
+/* ===== Quill Display Mode - List Rendering Fix ===== */
+/* Quill uses .ql-ui::before for list markers during editing,
+   but .ql-ui spans are NOT saved in HTML output. These rules
+   replicate list markers for saved/displayed content. */
+
+/* Counter reset on the ql-editor container */
+.ql-snow .ql-editor {
+  counter-reset: list-0 list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+
+/* Reset counters on non-list block elements */
+.ql-snow .ql-editor p,
+.ql-snow .ql-editor h1,
+.ql-snow .ql-editor h2,
+.ql-snow .ql-editor h3,
+.ql-snow .ql-editor h4,
+.ql-snow .ql-editor h5,
+.ql-snow .ql-editor h6 {
+  counter-reset: list-0 list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+
+/* Base list item style - ensures the ::before pseudo-element works */
+.ql-snow .ql-editor li[data-list] {
+  list-style-type: none;
+  position: relative;
+  padding-left: 1.5em;
+}
+
+/* Bullet list markers */
+.ql-snow .ql-editor li[data-list="bullet"]::before {
+  content: '\2022';
+  display: inline-block;
+  margin-left: -1.5em;
+  margin-right: 0.3em;
+  text-align: right;
+  white-space: nowrap;
+  width: 1.2em;
+}
+
+/* Ordered list - counter increment and display */
+.ql-snow .ql-editor li[data-list="ordered"] {
+  counter-increment: list-0;
+}
+
+.ql-snow .ql-editor li[data-list="ordered"]::before {
+  content: counter(list-0, decimal) '. ';
+  display: inline-block;
+  margin-left: -1.5em;
+  margin-right: 0.3em;
+  text-align: right;
+  white-space: nowrap;
+  width: 1.2em;
+}
+
+/* Counter resets for list items */
+.ql-snow .ql-editor li[data-list] {
+  counter-reset: list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+
+/* Indent level 1 */
+.ql-snow .ql-editor li[data-list="ordered"].ql-indent-1 {
+  counter-increment: list-1;
+}
+.ql-snow .ql-editor li[data-list="ordered"].ql-indent-1::before {
+  content: counter(list-1, lower-alpha) '. ';
+}
+.ql-snow .ql-editor li[data-list].ql-indent-1 {
+  counter-reset: list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+
+/* Indent level 2 */
+.ql-snow .ql-editor li[data-list="ordered"].ql-indent-2 {
+  counter-increment: list-2;
+}
+.ql-snow .ql-editor li[data-list="ordered"].ql-indent-2::before {
+  content: counter(list-2, lower-roman) '. ';
+}
+.ql-snow .ql-editor li[data-list].ql-indent-2 {
+  counter-reset: list-3 list-4 list-5 list-6 list-7 list-8 list-9;
+}
+
+/* Checked/unchecked list items */
+.ql-snow .ql-editor li[data-list="checked"]::before {
+  content: '\2611';
+  display: inline-block;
+  margin-left: -1.5em;
+  margin-right: 0.3em;
+  text-align: right;
+  white-space: nowrap;
+  width: 1.2em;
+}
+
+.ql-snow .ql-editor li[data-list="unchecked"]::before {
+  content: '\2610';
+  display: inline-block;
+  margin-left: -1.5em;
+  margin-right: 0.3em;
+  text-align: right;
+  white-space: nowrap;
+  width: 1.2em;
+}
+
+/* Hide .ql-ui in display mode to avoid double markers */
+.ql-snow .ql-editor li[data-list] > .ql-ui {
+  display: none;
+}
+
 /* ===== Monaco Editor Overrides ===== */
 .monaco-editor {
   border-radius: var(--radius-md);
