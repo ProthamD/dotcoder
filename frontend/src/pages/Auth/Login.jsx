@@ -9,7 +9,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, googleLogin } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -24,6 +24,45 @@ const Login = () => {
             setError(err.response?.data?.message || 'Login failed');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGoogleSuccess = async (response) => {
+        try {
+            setLoading(true);
+            await googleLogin(response.credential);
+            navigate('/');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Google login failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Load Google Sign-In script
+    useState(() => {
+        if (window.google) return;
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    }, []);
+
+    // Initialize Google button after script loads
+    const googleBtnRef = (node) => {
+        if (node && window.google?.accounts) {
+            window.google.accounts.id.initialize({
+                client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+                callback: handleGoogleSuccess
+            });
+            window.google.accounts.id.renderButton(node, {
+                theme: 'filled_black',
+                size: 'large',
+                width: '100%',
+                text: 'signin_with',
+                shape: 'rectangular'
+            });
         }
     };
 
@@ -92,6 +131,12 @@ const Login = () => {
                             {loading ? 'Signing in...' : 'Sign in'}
                             <ArrowRight size={18} />
                         </button>
+
+                        <div className="auth-divider">
+                            <span>or</span>
+                        </div>
+
+                        <div ref={googleBtnRef} className="google-btn-wrapper"></div>
                     </form>
 
                     {/* Footer */}

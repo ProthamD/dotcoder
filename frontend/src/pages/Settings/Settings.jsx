@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { ArrowLeft, User, Mail, Settings as SettingsIcon, Brain, Sparkles, Map } from 'lucide-react';
+import { ArrowLeft, User, Mail, Settings as SettingsIcon, Brain, Sparkles, Map, AlertTriangle, CheckCircle, Shield } from 'lucide-react';
 import './Settings.css';
 
 const Settings = () => {
-    const { user, updateSettings, logout } = useAuth();
+    const { user, updateSettings, logout, resendVerification } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [verifyLoading, setVerifyLoading] = useState(false);
+    const [verifyMessage, setVerifyMessage] = useState('');
     const [settings, setSettings] = useState(user?.settings || {
         aiEnabled: true,
         mindmapEnabled: true,
@@ -38,6 +40,19 @@ const Settings = () => {
         navigate('/login');
     };
 
+    const handleResendVerification = async () => {
+        setVerifyLoading(true);
+        setVerifyMessage('');
+        try {
+            const res = await resendVerification();
+            setVerifyMessage(res.message || 'Verification email sent!');
+        } catch (error) {
+            setVerifyMessage(error.response?.data?.message || 'Failed to send verification email');
+        } finally {
+            setVerifyLoading(false);
+        }
+    };
+
     return (
         <div className="page">
             <div className="container settings-container">
@@ -54,6 +69,29 @@ const Settings = () => {
                     <p className="page-description">Manage your account and preferences</p>
                 </div>
 
+                {/* Email Verification Alert */}
+                {!user?.emailVerified && (
+                    <div className="verification-alert">
+                        <div className="verification-alert-content">
+                            <AlertTriangle size={20} className="verification-alert-icon" />
+                            <div>
+                                <h4>Email not verified</h4>
+                                <p>Please verify your email address. Unverified accounts will be disabled within 15 business days.</p>
+                                {verifyMessage && (
+                                    <p className="verification-message">{verifyMessage}</p>
+                                )}
+                            </div>
+                        </div>
+                        <button
+                            className="btn btn-warning"
+                            onClick={handleResendVerification}
+                            disabled={verifyLoading}
+                        >
+                            {verifyLoading ? 'Sending...' : 'Verify Now'}
+                        </button>
+                    </div>
+                )}
+
                 {/* Profile Section */}
                 <div className="settings-section">
                     <div className="section-title-bar">
@@ -68,6 +106,16 @@ const Settings = () => {
                             <div>
                                 <h3>{user?.name}</h3>
                                 <p>{user?.email}</p>
+                                <div className="verification-badge" style={{ marginTop: '6px' }}>
+                                    {user?.emailVerified ? (
+                                        <span className="badge badge-success"><CheckCircle size={14} /> Verified</span>
+                                    ) : (
+                                        <span className="badge badge-warning"><AlertTriangle size={14} /> Not Verified</span>
+                                    )}
+                                    {user?.authProvider === 'google' && (
+                                        <span className="badge badge-info"><Shield size={14} /> Google</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

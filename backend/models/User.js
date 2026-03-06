@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -20,7 +21,9 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Please add a password'],
+        required: function () {
+            return this.authProvider === 'local';
+        },
         minlength: [6, 'Password must be at least 6 characters'],
         select: false
     },
@@ -28,6 +31,21 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
+    },
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: String,
+    emailVerificationExpires: Date,
+    authProvider: {
+        type: String,
+        enum: ['local', 'google'],
+        default: 'local'
+    },
+    googleId: {
+        type: String,
+        sparse: true
     },
     settings: {
         aiEnabled: {
@@ -51,6 +69,14 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
+
+// Generate email verification token
+userSchema.methods.generateVerificationToken = function () {
+    const token = crypto.randomBytes(32).toString('hex');
+    this.emailVerificationToken = crypto.createHash('sha256').update(token).digest('hex');
+    this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    return token;
+};
 
 // Encrypt password using bcrypt
 userSchema.pre('save', async function (next) {

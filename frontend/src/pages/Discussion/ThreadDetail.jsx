@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { ArrowLeft, MessageSquare, Eye, Clock, Send, Trash2, Code } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Eye, Clock, Send, Trash2, Code, Share2, Check } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './ThreadDetail.css';
 
@@ -15,6 +15,7 @@ const ThreadDetail = () => {
     const [error, setError] = useState('');
     const [isCodeMode, setIsCodeMode] = useState(false);
     const [expandedCodeBlocks, setExpandedCodeBlocks] = useState({});
+    const [copied, setCopied] = useState(false);
     const messagesEndRef = useRef(null);
     const chatMessagesRef = useRef(null);
 
@@ -132,6 +133,30 @@ const ThreadDetail = () => {
         }));
     };
 
+    const handleShare = async () => {
+        const url = window.location.href;
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: thread?.title,
+                    text: `Check out this discussion: ${thread?.title}`,
+                    url
+                });
+            } catch (err) {
+                // User cancelled or share failed, fall back to copy
+                copyToClipboard(url);
+            }
+        } else {
+            copyToClipboard(url);
+        }
+    };
+
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
     if (loading) {
         return (
             <div className="page">
@@ -170,7 +195,17 @@ const ThreadDetail = () => {
 
                 {/* Sticky Thread Header */}
                 <div className="thread-detail-header">
-                    <h1 className="thread-detail-title">{thread.title}</h1>
+                    <div className="thread-detail-header-top">
+                        <h1 className="thread-detail-title">{thread.title}</h1>
+                        <button
+                            className={`btn btn-ghost share-btn ${copied ? 'copied' : ''}`}
+                            onClick={handleShare}
+                            title="Share discussion link"
+                        >
+                            {copied ? <Check size={18} /> : <Share2 size={18} />}
+                            {copied ? 'Copied!' : 'Share'}
+                        </button>
+                    </div>
                     <div className="thread-detail-meta">
                         <div className="thread-meta-item">
                             <MessageSquare size={16} />
