@@ -50,4 +50,32 @@ export const sendVerificationEmail = async (user, token) => {
     });
 };
 
+export const sendOTPEmail = async (email, otp) => {
+    const html = `
+        <div style="max-width: 600px; margin: 0 auto; font-family: 'Inter', Arial, sans-serif; background: #0d0d0d; color: #ffffff; padding: 40px; border-radius: 12px;">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <h1 style="font-size: 32px; font-weight: 900; margin: 0;">. <span style="background: linear-gradient(135deg, #ff9843, #ffdd95); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">coder</span></h1>
+            </div>
+            <h2 style="text-align: center; color: #ffffff; margin-bottom: 16px;">Your Verification Code</h2>
+            <p style="color: #b4b4b4; text-align: center; margin-bottom: 32px;">
+                Use the code below to verify your email and create your .coder account.
+            </p>
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="display: inline-block; padding: 16px 40px; background: #1a1a1a; border: 2px solid rgba(255, 152, 67, 0.3); border-radius: 12px; letter-spacing: 8px; font-size: 32px; font-weight: 700; color: #ff9843;">
+                    ${otp}
+                </div>
+            </div>
+            <p style="color: #737373; text-align: center; font-size: 14px;">
+                This code expires in 10 minutes. If you didn't request this, ignore this email.
+            </p>
+        </div>
+    `;
+
+    await sendEmail({
+        to: email,
+        subject: 'Your .coder verification code',
+        html
+    });
+};
+
 export default sendEmail;

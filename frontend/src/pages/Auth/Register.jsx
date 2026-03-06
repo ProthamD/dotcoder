@@ -1,21 +1,58 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Sparkles, Mail, Lock, User, ArrowRight, CheckCircle } from 'lucide-react';
+import { Sparkles, Mail, Lock, User, ArrowRight, CheckCircle, ShieldCheck } from 'lucide-react';
 import './Auth.css';
 
 const Register = () => {
+    const [step, setStep] = useState(1); // 1: email, 2: OTP, 3: details
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [otp, setOtp] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [registered, setRegistered] = useState(false);
-    const { register, googleLogin } = useAuth();
+    const { register, sendOtp, verifyOtp, googleLogin } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    const handleSendOtp = async (e) => {
+        e.preventDefault();
+        setError('');
+        if (!email) {
+            setError('Please enter your email');
+            return;
+        }
+        setLoading(true);
+        try {
+            await sendOtp(email);
+            setStep(2);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to send verification code');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+        setError('');
+        if (!otp || otp.length !== 6) {
+            setError('Please enter the 6-digit code');
+            return;
+        }
+        setLoading(true);
+        try {
+            await verifyOtp(email, otp);
+            setStep(3);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Invalid verification code');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRegister = async (e) => {
         e.preventDefault();
         setError('');
 
@@ -23,19 +60,30 @@ const Register = () => {
             setError('Passwords do not match');
             return;
         }
-
         if (password.length < 6) {
             setError('Password must be at least 6 characters');
             return;
         }
 
         setLoading(true);
-
         try {
-            await register(name, email, password);
-            setRegistered(true);
+            await register(name, email, password, otp);
+            navigate('/');
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendOtp = async () => {
+        setError('');
+        setLoading(true);
+        try {
+            await sendOtp(email);
+            setError('');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to resend code');
         } finally {
             setLoading(false);
         }
@@ -80,33 +128,24 @@ const Register = () => {
         }
     };
 
-    if (registered) {
-        return (
-            <div className="auth-page">
-                <div className="auth-background">
-                    <div className="auth-gradient-orb auth-gradient-orb-1"></div>
-                    <div className="auth-gradient-orb auth-gradient-orb-2"></div>
-                    <div className="auth-gradient-orb auth-gradient-orb-3"></div>
-                </div>
-                <div className="auth-container">
-                    <div className="auth-card" style={{ textAlign: 'center' }}>
-                        <CheckCircle size={48} style={{ color: '#22c55e', margin: '0 auto 16px' }} />
-                        <h2 className="auth-title">Check your email</h2>
-                        <p className="auth-subtitle" style={{ marginBottom: '24px' }}>
-                            We've sent a verification link to <strong>{email}</strong>. Please verify your email to get full access.
-                        </p>
-                        <button
-                            className="btn btn-primary btn-lg"
-                            onClick={() => navigate('/')}
-                        >
-                            Continue to App
-                            <ArrowRight size={18} />
-                        </button>
-                    </div>
-                </div>
+    const renderStepIndicator = () => (
+        <div className="otp-steps">
+            <div className={`otp-step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
+                <span className="otp-step-num">{step > 1 ? '✓' : '1'}</span>
+                <span className="otp-step-label">Email</span>
             </div>
-        );
-    }
+            <div className={`otp-step-line ${step > 1 ? 'active' : ''}`}></div>
+            <div className={`otp-step ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
+                <span className="otp-step-num">{step > 2 ? '✓' : '2'}</span>
+                <span className="otp-step-label">Verify</span>
+            </div>
+            <div className={`otp-step-line ${step > 2 ? 'active' : ''}`}></div>
+            <div className={`otp-step ${step >= 3 ? 'active' : ''}`}>
+                <span className="otp-step-num">3</span>
+                <span className="otp-step-label">Details</span>
+            </div>
+        </div>
+    );
 
     return (
         <div className="auth-page">
@@ -124,92 +163,165 @@ const Register = () => {
                             <span style={{ fontSize: '64px', fontWeight: '900', transform: 'rotate(8deg)', display: 'inline-block' }}>.</span>
                         </div>
                         <h1 className="auth-title">Create account</h1>
-                        <p className="auth-subtitle">Start your learning journey with .coder</p>
+                        <p className="auth-subtitle">
+                            {step === 1 && 'Enter your email to get started'}
+                            {step === 2 && 'Enter the verification code sent to your email'}
+                            {step === 3 && 'Complete your profile'}
+                        </p>
                     </div>
 
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="auth-form">
-                        {error && (
-                            <div className="auth-error">
-                                {error}
-                            </div>
-                        )}
+                    {renderStepIndicator()}
 
-                        <div className="input-group">
-                            <label className="input-label">Full Name</label>
-                            <div className="input-with-icon">
-                                <User size={18} className="input-icon" />
+                    {error && (
+                        <div className="auth-error">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Step 1: Email */}
+                    {step === 1 && (
+                        <form onSubmit={handleSendOtp} className="auth-form">
+                            <div className="input-group">
+                                <label className="input-label">Email</label>
+                                <div className="input-with-icon">
+                                    <Mail size={18} className="input-icon" />
+                                    <input
+                                        type="email"
+                                        className="input"
+                                        placeholder="you@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="btn btn-primary btn-lg auth-submit"
+                                disabled={loading}
+                            >
+                                {loading ? 'Sending code...' : 'Send verification code'}
+                                <ArrowRight size={18} />
+                            </button>
+
+                            <div className="auth-divider">
+                                <span>or</span>
+                            </div>
+
+                            <div ref={googleBtnRef} className="google-btn-wrapper"></div>
+                        </form>
+                    )}
+
+                    {/* Step 2: OTP Verification */}
+                    {step === 2 && (
+                        <form onSubmit={handleVerifyOtp} className="auth-form">
+                            <div className="otp-sent-info">
+                                <ShieldCheck size={20} />
+                                <span>Code sent to <strong>{email}</strong></span>
+                            </div>
+
+                            <div className="input-group">
+                                <label className="input-label">Verification Code</label>
                                 <input
                                     type="text"
-                                    className="input"
-                                    placeholder="John Doe"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
+                                    className="input otp-input"
+                                    placeholder="000000"
+                                    value={otp}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                        setOtp(val);
+                                    }}
+                                    maxLength={6}
+                                    autoFocus
                                     required
                                 />
                             </div>
-                        </div>
 
-                        <div className="input-group">
-                            <label className="input-label">Email</label>
-                            <div className="input-with-icon">
-                                <Mail size={18} className="input-icon" />
-                                <input
-                                    type="email"
-                                    className="input"
-                                    placeholder="you@example.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
+                            <button
+                                type="submit"
+                                className="btn btn-primary btn-lg auth-submit"
+                                disabled={loading || otp.length !== 6}
+                            >
+                                {loading ? 'Verifying...' : 'Verify email'}
+                                <CheckCircle size={18} />
+                            </button>
+
+                            <div className="otp-actions">
+                                <button type="button" className="auth-link-btn" onClick={handleResendOtp} disabled={loading}>
+                                    Resend code
+                                </button>
+                                <button type="button" className="auth-link-btn" onClick={() => { setStep(1); setOtp(''); setError(''); }}>
+                                    Change email
+                                </button>
                             </div>
-                        </div>
+                        </form>
+                    )}
 
-                        <div className="input-group">
-                            <label className="input-label">Password</label>
-                            <div className="input-with-icon">
-                                <Lock size={18} className="input-icon" />
-                                <input
-                                    type="password"
-                                    className="input"
-                                    placeholder="Create a password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
+                    {/* Step 3: Name & Password */}
+                    {step === 3 && (
+                        <form onSubmit={handleRegister} className="auth-form">
+                            <div className="otp-sent-info otp-verified">
+                                <CheckCircle size={20} />
+                                <span><strong>{email}</strong> verified</span>
                             </div>
-                        </div>
 
-                        <div className="input-group">
-                            <label className="input-label">Confirm Password</label>
-                            <div className="input-with-icon">
-                                <Lock size={18} className="input-icon" />
-                                <input
-                                    type="password"
-                                    className="input"
-                                    placeholder="Confirm your password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    required
-                                />
+                            <div className="input-group">
+                                <label className="input-label">Full Name</label>
+                                <div className="input-with-icon">
+                                    <User size={18} className="input-icon" />
+                                    <input
+                                        type="text"
+                                        className="input"
+                                        placeholder="John Doe"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
                             </div>
-                        </div>
 
-                        <button
-                            type="submit"
-                            className="btn btn-primary btn-lg auth-submit"
-                            disabled={loading}
-                        >
-                            {loading ? 'Creating account...' : 'Create account'}
-                            <ArrowRight size={18} />
-                        </button>
+                            <div className="input-group">
+                                <label className="input-label">Password</label>
+                                <div className="input-with-icon">
+                                    <Lock size={18} className="input-icon" />
+                                    <input
+                                        type="password"
+                                        className="input"
+                                        placeholder="Create a password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
 
-                        <div className="auth-divider">
-                            <span>or</span>
-                        </div>
+                            <div className="input-group">
+                                <label className="input-label">Confirm Password</label>
+                                <div className="input-with-icon">
+                                    <Lock size={18} className="input-icon" />
+                                    <input
+                                        type="password"
+                                        className="input"
+                                        placeholder="Confirm your password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
 
-                        <div ref={googleBtnRef} className="google-btn-wrapper"></div>
-                    </form>
+                            <button
+                                type="submit"
+                                className="btn btn-primary btn-lg auth-submit"
+                                disabled={loading}
+                            >
+                                {loading ? 'Creating account...' : 'Create account'}
+                                <ArrowRight size={18} />
+                            </button>
+                        </form>
+                    )}
 
                     {/* Footer */}
                     <div className="auth-footer">

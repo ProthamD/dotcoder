@@ -2,18 +2,133 @@ import express from 'express';
 import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
+import OTP from '../models/OTP.js';
 import { protect, generateToken } from '../middleware/auth.js';
-import { sendVerificationEmail } from '../utils/sendEmail.js';
+import { sendVerificationEmail, sendOTPEmail } from '../utils/sendEmail.js';
 
 const router = express.Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// @desc    Register user
+// @desc    Send OTP to email for signup verification
+// @route   POST /api/auth/send-otp
+// @access  Public
+router.post('/send-otp', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide an email'
+            });
+        }
+
+        // Check if user already exists
+        const userExists = await User.findOne({ email: email.toLowerCase() });
+        if (userExists) {
+            return res.status(400).json({
+                success: false,
+                message: 'User already exists with this email'
+            });
+        }
+
+        // Delete any existing OTPs for this email
+        await OTP.deleteMany({ email: email.toLowerCase() });
+
+        // Generate and store OTP
+        const otp = OTP.generateOTP();
+        const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+        await OTP.create({
+            email: email.toLowerCase(),
+            otp: hashedOtp,
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+        });
+
+        // Send OTP email
+        await sendOTPEmail(email, otp);
+
+        res.status(200).json({
+            success: true,
+            message: 'Verification code sent to your email'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// @desc    Verify OTP
+// @route   POST /api/auth/verify-otp
+// @access  Public
+router.post('/verify-otp', async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide email and OTP'
+            });
+        }
+
+        const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+        const otpRecord = await OTP.findOne({
+            email: email.toLowerCase(),
+            otp: hashedOtp,
+            expiresAt: { $gt: new Date() }
+        });
+
+        if (!otpRecord) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid or expired verification code'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Email verified successfully'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// @desc    Register user (requires verified OTP)
 // @route   POST /api/auth/register
 // @access  Public
 router.post('/register', async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, otp } = req.body;
+
+        if (!otp) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email verification is required'
+            });
+        }
+
+        // Verify OTP
+        const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+        const otpRecord = await OTP.findOne({
+            email: email.toLowerCase(),
+            otp: hashedOtp,
+            expiresAt: { $gt: new Date() }
+        });
+
+        if (!otpRecord) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid or expired verification code. Please verify your email again.'
+            });
+        }
 
         // Check if user exists
         const userExists = await User.findOne({ email });
@@ -25,23 +140,17 @@ router.post('/register', async (req, res) => {
             });
         }
 
-        // Create user
+        // Create user with verified email
         const user = await User.create({
             name,
             email,
             password,
-            authProvider: 'local'
+            authProvider: 'local',
+            emailVerified: true
         });
 
-        // Generate verification token and send email
-        const verificationToken = user.generateVerificationToken();
-        await user.save({ validateBeforeSave: false });
-
-        try {
-            await sendVerificationEmail(user, verificationToken);
-        } catch (emailErr) {
-            console.error('Failed to send verification email:', emailErr.message);
-        }
+        // Clean up OTP
+        await OTP.deleteMany({ email: email.toLowerCase() });
 
         // Generate token
         const token = generateToken(user._id);

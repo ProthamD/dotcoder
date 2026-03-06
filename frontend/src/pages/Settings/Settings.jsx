@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ArrowLeft, User, Mail, Settings as SettingsIcon, Brain, Sparkles, Map, AlertTriangle, CheckCircle, Shield } from 'lucide-react';
 import './Settings.css';
 
 const Settings = () => {
-    const { user, updateSettings, logout, resendVerification } = useAuth();
+    const { user, updateSettings, logout, resendVerification, refreshUser } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [verifyLoading, setVerifyLoading] = useState(false);
@@ -15,6 +15,11 @@ const Settings = () => {
         mindmapEnabled: true,
         suggestionsEnabled: true
     });
+
+    // Refresh user data on mount so emailVerified status is always current
+    useEffect(() => {
+        refreshUser();
+    }, []);
 
     const handleToggle = async (key) => {
         const newSettings = {

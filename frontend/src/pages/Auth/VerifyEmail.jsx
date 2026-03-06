@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
 import './Auth.css';
 
@@ -8,6 +9,8 @@ const VerifyEmail = () => {
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState('verifying'); // verifying, success, error
     const [message, setMessage] = useState('');
+    const { refreshUser, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = searchParams.get('token');
@@ -24,6 +27,8 @@ const VerifyEmail = () => {
             const res = await api.get(`/auth/verify-email/${token}`);
             setStatus('success');
             setMessage(res.data.message);
+            // Refresh user state so emailVerified updates
+            await refreshUser();
         } catch (error) {
             setStatus('error');
             setMessage(error.response?.data?.message || 'Verification failed');
@@ -59,9 +64,19 @@ const VerifyEmail = () => {
                             <CheckCircle size={48} style={{ color: '#22c55e', margin: '0 auto 16px' }} />
                             <h2 className="auth-title">Email Verified!</h2>
                             <p className="auth-subtitle" style={{ marginBottom: '24px' }}>{message}</p>
-                            <Link to="/login" className="btn btn-primary btn-lg" style={{ display: 'inline-flex', gap: '8px' }}>
-                                Continue to Login
-                            </Link>
+                            {isAuthenticated ? (
+                                <button
+                                    className="btn btn-primary btn-lg"
+                                    style={{ display: 'inline-flex', gap: '8px' }}
+                                    onClick={() => navigate('/')}
+                                >
+                                    Continue to App
+                                </button>
+                            ) : (
+                                <Link to="/login" className="btn btn-primary btn-lg" style={{ display: 'inline-flex', gap: '8px' }}>
+                                    Continue to Login
+                                </Link>
+                            )}
                         </>
                     )}
 

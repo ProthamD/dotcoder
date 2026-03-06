@@ -43,13 +43,23 @@ export const AuthProvider = ({ children }) => {
         return userData;
     };
 
-    const register = async (name, email, password) => {
-        const res = await api.post('/auth/register', { name, email, password });
+    const register = async (name, email, password, otp) => {
+        const res = await api.post('/auth/register', { name, email, password, otp });
         const { token, ...userData } = res.data.data;
         localStorage.setItem('token', token);
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setUser(userData);
         return userData;
+    };
+
+    const sendOtp = async (email) => {
+        const res = await api.post('/auth/send-otp', { email });
+        return res.data;
+    };
+
+    const verifyOtp = async (email, otp) => {
+        const res = await api.post('/auth/verify-otp', { email, otp });
+        return res.data;
     };
 
     const googleLogin = async (credential) => {
@@ -78,6 +88,19 @@ export const AuthProvider = ({ children }) => {
         return res.data;
     };
 
+    const refreshUser = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                const res = await api.get('/auth/me');
+                setUser(res.data.data);
+            } catch (error) {
+                // ignore
+            }
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -85,10 +108,13 @@ export const AuthProvider = ({ children }) => {
                 loading,
                 login,
                 register,
+                sendOtp,
+                verifyOtp,
                 googleLogin,
                 logout,
                 updateSettings,
                 resendVerification,
+                refreshUser,
                 isAuthenticated: !!user,
                 isAdmin: user?.role === 'admin'
             }}
