@@ -23,6 +23,11 @@ const threadSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    channel: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Channel',
+        required: true
+    },
     title: {
         type: String,
         required: true,
@@ -37,6 +42,14 @@ const threadSchema = new mongoose.Schema({
         type: String,
         trim: true
     }],
+    isPinned: {
+        type: Boolean,
+        default: false
+    },
+    isPrioritized: {
+        type: Boolean,
+        default: false
+    },
     replies: [replySchema],
     views: {
         type: Number,
@@ -47,6 +60,7 @@ const threadSchema = new mongoose.Schema({
 });
 
 // Index for faster queries
+threadSchema.index({ channel: 1, isPinned: -1, createdAt: -1 });
 threadSchema.index({ user: 1, createdAt: -1 });
 threadSchema.index({ createdAt: -1 });
 

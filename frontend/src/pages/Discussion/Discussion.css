@@ -205,6 +205,220 @@
     margin-bottom: var(--spacing-lg);
 }
 
+/* Discussion Layout with Channel Sidebar */
+.discussion-layout {
+    display: flex;
+    gap: var(--spacing-lg);
+}
+
+/* Channel Sidebar */
+.channel-sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    height: fit-content;
+    position: sticky;
+    top: calc(var(--navbar-height) + var(--spacing-lg));
+}
+
+.channel-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.channel-sidebar-header h3 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.channel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.channel-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.channel-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.channel-item.active {
+    background: linear-gradient(135deg, rgba(255, 152, 67, 0.15), rgba(255, 221, 149, 0.1));
+    color: #ff9843;
+    border: 1px solid rgba(255, 152, 67, 0.3);
+}
+
+.channel-item-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.channel-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.channel-delete-btn {
+    opacity: 0;
+    padding: 2px !important;
+    min-width: auto !important;
+    transition: opacity var(--transition-base);
+}
+
+.channel-item:hover .channel-delete-btn {
+    opacity: 0.6;
+}
+
+.channel-delete-btn:hover {
+    opacity: 1 !important;
+    color: #f87171 !important;
+}
+
+/* Threads Main Content */
+.threads-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.channel-info-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.channel-info-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.channel-info-desc {
+    color: var(--text-muted);
+}
+
+/* Channel Indicator in Modal */
+.channel-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* Thread Badges (Pinned / Prioritized) */
+.thread-badges {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.thread-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.pinned-badge {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.priority-badge {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+/* Pinned & Prioritized Thread Cards */
+.thread-card.pinned {
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.thread-card.prioritized {
+    border-color: rgba(168, 85, 247, 0.3);
+    background: linear-gradient(135deg, var(--bg-card), rgba(168, 85, 247, 0.05));
+}
+
+/* Thread Delete Button */
+.thread-delete-btn {
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    color: var(--text-muted);
+    padding: 4px !important;
+}
+
+.thread-card:hover .thread-delete-btn {
+    opacity: 0.6;
+}
+
+.thread-delete-btn:hover {
+    opacity: 1 !important;
+    color: #f87171 !important;
+}
+
+/* Role Badges */
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.role-admin {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.role-trusted {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .discussion-header {
@@ -215,6 +429,26 @@
 
     .discussion-header .btn {
         width: 100%;
+    }
+
+    .discussion-layout {
+        flex-direction: column;
+    }
+
+    .channel-sidebar {
+        width: 100%;
+        min-width: unset;
+        position: static;
+    }
+
+    .channel-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .channel-item {
+        padding: 4px 10px;
     }
 
     .thread-meta {

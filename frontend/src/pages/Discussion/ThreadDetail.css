@@ -22,11 +22,55 @@
     backdrop-filter: blur(10px);
 }
 
+.thread-detail-header.pinned {
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.thread-detail-header.prioritized {
+    border-color: rgba(168, 85, 247, 0.3);
+    background: linear-gradient(135deg, var(--bg-primary), rgba(168, 85, 247, 0.05));
+}
+
 .thread-detail-title {
     font-size: var(--font-size-base);
     font-weight: 600;
     margin-bottom: 2px;
     line-height: 1.2;
+}
+
+.thread-detail-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.thread-detail-badges {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.thread-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.active-action {
+    color: #ff9843 !important;
+    background: rgba(255, 152, 67, 0.15) !important;
+}
+
+.delete-thread-btn {
+    color: var(--text-muted);
+}
+
+.delete-thread-btn:hover {
+    color: #f87171 !important;
+    background: rgba(239, 68, 68, 0.1) !important;
 }
 
 .thread-detail-header-top {

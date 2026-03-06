@@ -116,7 +116,8 @@ export const AuthProvider = ({ children }) => {
                 resendVerification,
                 refreshUser,
                 isAuthenticated: !!user,
-                isAdmin: user?.role === 'admin'
+                isAdmin: user?.role === 'admin',
+                isTrusted: user?.role === 'trusted'
             }}
         >
             {children}

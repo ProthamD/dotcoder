@@ -1,28 +1,57 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { Plus, MessageSquare, Eye, Clock, X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Plus, MessageSquare, Eye, Clock, X, Hash, Pin, Shield, Trash2, Globe } from 'lucide-react';
 import './Discussion.css';
 
 const Discussion = () => {
+    const { user, isAdmin } = useAuth();
     const [threads, setThreads] = useState([]);
+    const [channels, setChannels] = useState([]);
+    const [activeChannel, setActiveChannel] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showChannelModal, setShowChannelModal] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         content: '',
         tags: ''
     });
+    const [channelForm, setChannelForm] = useState({ name: '', description: '' });
     const [error, setError] = useState('');
+    const [channelError, setChannelError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchThreads();
+        fetchChannels();
     }, []);
 
-    const fetchThreads = async () => {
+    useEffect(() => {
+        if (activeChannel !== null) {
+            fetchThreads();
+        }
+    }, [activeChannel]);
+
+    const fetchChannels = async () => {
         try {
-            const res = await api.get('/threads');
+            const res = await api.get('/channels');
+            const channelList = res.data.data;
+            setChannels(channelList);
+            // Default to Global channel
+            const global = channelList.find(c => c.isDefault);
+            setActiveChannel(global ? global._id : (channelList[0]?._id || null));
+        } catch (error) {
+            console.error('Error fetching channels:', error);
+            setLoading(false);
+        }
+    };
+
+    const fetchThreads = async () => {
+        setLoading(true);
+        try {
+            const url = activeChannel ? `/threads?channel=${activeChannel}` : '/threads';
+            const res = await api.get(url);
             setThreads(res.data.data);
         } catch (error) {
             console.error('Error fetching threads:', error);
@@ -44,7 +73,8 @@ const Discussion = () => {
             const threadData = {
                 title: formData.title,
                 content: formData.content,
-                tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+                tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+                channel: activeChannel
             };
 
             const res = await api.post('/threads', threadData);
@@ -53,6 +83,51 @@ const Discussion = () => {
             setFormData({ title: '', content: '', tags: '' });
         } catch (error) {
             setError(error.response?.data?.message || 'Failed to create thread');
+        }
+    };
+
+    const handleCreateChannel = async (e) => {
+        e.preventDefault();
+        setChannelError('');
+
+        if (!channelForm.name.trim()) {
+            setChannelError('Channel name is required');
+            return;
+        }
+
+        try {
+            const res = await api.post('/channels', channelForm);
+            setChannels([...channels, res.data.data]);
+            setShowChannelModal(false);
+            setChannelForm({ name: '', description: '' });
+        } catch (error) {
+            setChannelError(error.response?.data?.message || 'Failed to create channel');
+        }
+    };
+
+    const handleDeleteChannel = async (channelId) => {
+        if (!window.confirm('Delete this channel? All threads will be moved to Global.')) return;
+        try {
+            await api.delete(`/channels/${channelId}`);
+            setChannels(channels.filter(c => c._id !== channelId));
+            // Switch to Global if we deleted the active channel
+            if (activeChannel === channelId) {
+                const global = channels.find(c => c.isDefault);
+                setActiveChannel(global?._id || null);
+            }
+        } catch (error) {
+            console.error('Error deleting channel:', error);
+        }
+    };
+
+    const handleDeleteThread = async (e, threadId) => {
+        e.stopPropagation();
+        if (!window.confirm('Delete this thread?')) return;
+        try {
+            await api.delete(`/threads/${threadId}`);
+            setThreads(threads.filter(t => t._id !== threadId));
+        } catch (error) {
+            alert(error.response?.data?.message || 'Failed to delete thread');
         }
     };
 
@@ -74,6 +149,8 @@ const Discussion = () => {
         return threadDate.toLocaleDateString();
     };
 
+    const activeChannelData = channels.find(c => c._id === activeChannel);
+
     return (
         <div className="page">
             <div className="container">
@@ -93,75 +170,165 @@ const Discussion = () => {
                     </button>
                 </div>
 
-                {loading ? (
-                    <div className="threads-container">
-                        {[...Array(5)].map((_, i) => (
-                            <div key={i} className="thread-card">
-                                <div className="skeleton" style={{ height: 100 }}></div>
-                            </div>
-                        ))}
-                    </div>
-                ) : threads.length === 0 ? (
-                    <div className="empty-state">
-                        <div className="empty-state-icon">
-                            <MessageSquare size={40} />
+                <div className="discussion-layout">
+                    {/* Channel Sidebar */}
+                    <div className="channel-sidebar">
+                        <div className="channel-sidebar-header">
+                            <h3>Channels</h3>
+                            {isAdmin && (
+                                <button
+                                    className="btn btn-ghost btn-icon btn-sm"
+                                    onClick={() => setShowChannelModal(true)}
+                                    title="Create Channel"
+                                >
+                                    <Plus size={16} />
+                                </button>
+                            )}
                         </div>
-                        <h3 className="empty-state-title">No threads yet</h3>
-                        <p className="empty-state-description">
-                            Be the first to start a discussion
-                        </p>
-                        <button
-                            className="btn btn-primary"
-                            onClick={() => setShowCreateModal(true)}
-                        >
-                            <Plus size={18} />
-                            Create First Thread
-                        </button>
+                        <div className="channel-list">
+                            {channels.map((channel) => (
+                                <div
+                                    key={channel._id}
+                                    className={`channel-item ${activeChannel === channel._id ? 'active' : ''}`}
+                                    onClick={() => setActiveChannel(channel._id)}
+                                >
+                                    <div className="channel-item-info">
+                                        {channel.isDefault ? <Globe size={16} /> : <Hash size={16} />}
+                                        <span className="channel-name">{channel.name}</span>
+                                    </div>
+                                    {isAdmin && !channel.isDefault && (
+                                        <button
+                                            className="btn btn-ghost btn-icon channel-delete-btn"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteChannel(channel._id);
+                                            }}
+                                            title="Delete channel"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                ) : (
-                    <div className="threads-container">
-                        {threads.map((thread) => (
-                            <div
-                                key={thread._id}
-                                className="thread-card"
-                                onClick={() => handleThreadClick(thread._id)}
-                            >
-                                <div className="thread-card-header">
-                                    <div style={{ flex: 1 }}>
-                                        <h3 className="thread-title">{thread.title}</h3>
-                                        <p className="thread-content">{thread.content}</p>
-                                        {thread.tags && thread.tags.length > 0 && (
-                                            <div className="thread-tags">
-                                                {thread.tags.map((tag, index) => (
-                                                    <span key={index} className="thread-tag">
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="thread-meta">
-                                    <div className="thread-meta-item">
-                                        <MessageSquare size={16} />
-                                        <span>{thread.replies?.length || 0} replies</span>
-                                    </div>
-                                    <div className="thread-meta-item">
-                                        <Eye size={16} />
-                                        <span>{thread.views || 0} views</span>
-                                    </div>
-                                    <div className="thread-meta-item">
-                                        <Clock size={16} />
-                                        <span>{formatDate(thread.createdAt)}</span>
-                                    </div>
-                                    <div className="thread-meta-item">
-                                        <span>by {thread.user?.name}</span>
-                                    </div>
-                                </div>
+
+                    {/* Thread List */}
+                    <div className="threads-main">
+                        {activeChannelData && (
+                            <div className="channel-info-bar">
+                                {activeChannelData.isDefault ? <Globe size={18} /> : <Hash size={18} />}
+                                <span className="channel-info-name">{activeChannelData.name}</span>
+                                {activeChannelData.description && (
+                                    <span className="channel-info-desc">— {activeChannelData.description}</span>
+                                )}
                             </div>
-                        ))}
+                        )}
+
+                        {loading ? (
+                            <div className="threads-container">
+                                {[...Array(5)].map((_, i) => (
+                                    <div key={i} className="thread-card">
+                                        <div className="skeleton" style={{ height: 100 }}></div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : threads.length === 0 ? (
+                            <div className="empty-state">
+                                <div className="empty-state-icon">
+                                    <MessageSquare size={40} />
+                                </div>
+                                <h3 className="empty-state-title">No threads yet</h3>
+                                <p className="empty-state-description">
+                                    Be the first to start a discussion in this channel
+                                </p>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => setShowCreateModal(true)}
+                                >
+                                    <Plus size={18} />
+                                    Create First Thread
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="threads-container">
+                                {threads.map((thread) => {
+                                    const isOwner = user && user.id === thread.user?._id;
+                                    const canDelete = isAdmin || (isOwner && !thread.isPrioritized);
+
+                                    return (
+                                        <div
+                                            key={thread._id}
+                                            className={`thread-card ${thread.isPinned ? 'pinned' : ''} ${thread.isPrioritized ? 'prioritized' : ''}`}
+                                            onClick={() => handleThreadClick(thread._id)}
+                                        >
+                                            {(thread.isPinned || thread.isPrioritized) && (
+                                                <div className="thread-badges">
+                                                    {thread.isPinned && (
+                                                        <span className="thread-badge pinned-badge">
+                                                            <Pin size={12} /> Pinned
+                                                        </span>
+                                                    )}
+                                                    {thread.isPrioritized && (
+                                                        <span className="thread-badge priority-badge">
+                                                            <Shield size={12} /> Prioritized
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                            <div className="thread-card-header">
+                                                <div style={{ flex: 1 }}>
+                                                    <h3 className="thread-title">{thread.title}</h3>
+                                                    <p className="thread-content">{thread.content}</p>
+                                                    {thread.tags && thread.tags.length > 0 && (
+                                                        <div className="thread-tags">
+                                                            {thread.tags.map((tag, index) => (
+                                                                <span key={index} className="thread-tag">
+                                                                    {tag}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {canDelete && (
+                                                    <button
+                                                        className="btn btn-ghost btn-icon thread-delete-btn"
+                                                        onClick={(e) => handleDeleteThread(e, thread._id)}
+                                                        title="Delete thread"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="thread-meta">
+                                                <div className="thread-meta-item">
+                                                    <MessageSquare size={16} />
+                                                    <span>{thread.replies?.length || 0} replies</span>
+                                                </div>
+                                                <div className="thread-meta-item">
+                                                    <Eye size={16} />
+                                                    <span>{thread.views || 0} views</span>
+                                                </div>
+                                                <div className="thread-meta-item">
+                                                    <Clock size={16} />
+                                                    <span>{formatDate(thread.createdAt)}</span>
+                                                </div>
+                                                <div className="thread-meta-item">
+                                                    <span>by {thread.user?.name}</span>
+                                                    {(thread.user?.role === 'admin' || thread.user?.role === 'trusted') && (
+                                                        <span className={`role-badge role-${thread.user.role}`}>
+                                                            {thread.user.role === 'admin' ? 'Admin' : 'Trusted'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
 
                 {/* Create Thread Modal */}
                 {showCreateModal && (
@@ -190,6 +357,14 @@ const Discussion = () => {
                             )}
 
                             <form onSubmit={handleSubmit} className="modal-form">
+                                <div className="form-group">
+                                    <label>Channel</label>
+                                    <div className="channel-indicator">
+                                        {activeChannelData?.isDefault ? <Globe size={16} /> : <Hash size={16} />}
+                                        <span>{activeChannelData?.name || 'Global'}</span>
+                                    </div>
+                                </div>
+
                                 <div className="form-group">
                                     <label>Title *</label>
                                     <input
@@ -230,6 +405,72 @@ const Discussion = () => {
                                     </button>
                                     <button type="submit" className="btn btn-primary">
                                         Create Thread
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Create Channel Modal (Admin only) */}
+                {showChannelModal && (
+                    <div className="modal-overlay" onClick={() => setShowChannelModal(false)}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h2>Create Channel</h2>
+                                <button
+                                    className="btn btn-ghost btn-icon"
+                                    onClick={() => setShowChannelModal(false)}
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {channelError && (
+                                <div style={{
+                                    padding: 'var(--spacing-md)',
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    borderRadius: 'var(--radius-md)',
+                                    color: '#f87171',
+                                    marginBottom: 'var(--spacing-lg)'
+                                }}>
+                                    {channelError}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleCreateChannel} className="modal-form">
+                                <div className="form-group">
+                                    <label>Channel Name *</label>
+                                    <input
+                                        type="text"
+                                        value={channelForm.name}
+                                        onChange={(e) => setChannelForm({ ...channelForm, name: e.target.value })}
+                                        placeholder="e.g. javascript, react-help"
+                                        maxLength={50}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Description</label>
+                                    <input
+                                        type="text"
+                                        value={channelForm.description}
+                                        onChange={(e) => setChannelForm({ ...channelForm, description: e.target.value })}
+                                        placeholder="What is this channel about?"
+                                        maxLength={200}
+                                    />
+                                </div>
+
+                                <div className="modal-actions">
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        onClick={() => setShowChannelModal(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        Create Channel
                                     </button>
                                 </div>
                             </form>

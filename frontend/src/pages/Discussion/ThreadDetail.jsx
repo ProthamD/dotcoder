@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { ArrowLeft, MessageSquare, Eye, Clock, Send, Trash2, Code, Share2, Check } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Eye, Clock, Send, Trash2, Code, Share2, Check, Pin, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './ThreadDetail.css';
 
 const ThreadDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
     const [thread, setThread] = useState(null);
     const [loading, setLoading] = useState(true);
     const [messageContent, setMessageContent] = useState('');
@@ -157,6 +157,34 @@ const ThreadDetail = () => {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const handleDeleteThread = async () => {
+        if (!window.confirm('Delete this entire thread?')) return;
+        try {
+            await api.delete(`/threads/${id}`);
+            navigate('/discussion');
+        } catch (error) {
+            alert(error.response?.data?.message || 'Failed to delete thread');
+        }
+    };
+
+    const handleTogglePin = async () => {
+        try {
+            const res = await api.put(`/threads/${id}/pin`);
+            setThread(res.data.data);
+        } catch (error) {
+            console.error('Error toggling pin:', error);
+        }
+    };
+
+    const handleTogglePrioritize = async () => {
+        try {
+            const res = await api.put(`/threads/${id}/prioritize`);
+            setThread(res.data.data);
+        } catch (error) {
+            console.error('Error toggling prioritize:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="page">
@@ -194,17 +222,62 @@ const ThreadDetail = () => {
                 </button>
 
                 {/* Sticky Thread Header */}
-                <div className="thread-detail-header">
+                <div className={`thread-detail-header ${thread.isPinned ? 'pinned' : ''} ${thread.isPrioritized ? 'prioritized' : ''}`}>
                     <div className="thread-detail-header-top">
-                        <h1 className="thread-detail-title">{thread.title}</h1>
-                        <button
-                            className={`btn btn-ghost share-btn ${copied ? 'copied' : ''}`}
-                            onClick={handleShare}
-                            title="Share discussion link"
-                        >
-                            {copied ? <Check size={18} /> : <Share2 size={18} />}
-                            {copied ? 'Copied!' : 'Share'}
-                        </button>
+                        <div className="thread-detail-title-row">
+                            {(thread.isPinned || thread.isPrioritized) && (
+                                <div className="thread-detail-badges">
+                                    {thread.isPinned && (
+                                        <span className="thread-badge pinned-badge">
+                                            <Pin size={12} />
+                                        </span>
+                                    )}
+                                    {thread.isPrioritized && (
+                                        <span className="thread-badge priority-badge">
+                                            <Shield size={12} />
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                            <h1 className="thread-detail-title">{thread.title}</h1>
+                        </div>
+                        <div className="thread-detail-actions">
+                            {isAdmin && (
+                                <>
+                                    <button
+                                        className={`btn btn-ghost btn-icon btn-sm ${thread.isPinned ? 'active-action' : ''}`}
+                                        onClick={handleTogglePin}
+                                        title={thread.isPinned ? 'Unpin' : 'Pin'}
+                                    >
+                                        <Pin size={16} />
+                                    </button>
+                                    <button
+                                        className={`btn btn-ghost btn-icon btn-sm ${thread.isPrioritized ? 'active-action' : ''}`}
+                                        onClick={handleTogglePrioritize}
+                                        title={thread.isPrioritized ? 'Remove Priority' : 'Prioritize'}
+                                    >
+                                        <Shield size={16} />
+                                    </button>
+                                </>
+                            )}
+                            <button
+                                className={`btn btn-ghost share-btn ${copied ? 'copied' : ''}`}
+                                onClick={handleShare}
+                                title="Share discussion link"
+                            >
+                                {copied ? <Check size={18} /> : <Share2 size={18} />}
+                                {copied ? 'Copied!' : 'Share'}
+                            </button>
+                            {(isAdmin || (user && user.id === thread.user?._id && !thread.isPrioritized)) && (
+                                <button
+                                    className="btn btn-ghost btn-icon btn-sm delete-thread-btn"
+                                    onClick={handleDeleteThread}
+                                    title="Delete thread"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <div className="thread-detail-meta">
                         <div className="thread-meta-item">
@@ -221,7 +294,17 @@ const ThreadDetail = () => {
                         </div>
                         <div className="thread-meta-item">
                             <span>by {thread.user?.name}</span>
+                            {(thread.user?.role === 'admin' || thread.user?.role === 'trusted') && (
+                                <span className={`role-badge role-${thread.user.role}`}>
+                                    {thread.user.role === 'admin' ? 'Admin' : 'Trusted'}
+                                </span>
+                            )}
                         </div>
+                        {thread.channel && (
+                            <div className="thread-meta-item">
+                                <span>in #{thread.channel.name}</span>
+                            </div>
+                        )}
                     </div>
                     {thread.tags && thread.tags.length > 0 && (
                         <div className="thread-detail-tags">
@@ -292,7 +375,7 @@ const ThreadDetail = () => {
                                                     }
                                                     return reply.content;
                                                 })()}
-                                                {user && user.id === reply.user?._id && (
+                                                {(user && (user.id === reply.user?._id || isAdmin)) && (
                                                     <div className="chat-bubble-actions">
                                                         <button
                                                             className="btn btn-ghost btn-icon"
