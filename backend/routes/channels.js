@@ -1,6 +1,6 @@
 import express from 'express';
 import Channel from '../models/Channel.js';
-import { protect, adminOnly } from '../middleware/auth.js';
+import { protect, adminOnly, trustedOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -21,8 +21,8 @@ router.get('/', protect, async (req, res) => {
 
 // @desc    Create channel
 // @route   POST /api/channels
-// @access  Admin only
-router.post('/', protect, adminOnly, async (req, res) => {
+// @access  Trusted or Admin
+router.post('/', protect, trustedOnly, async (req, res) => {
     try {
         const { name, description } = req.body;
 

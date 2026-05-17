@@ -54,6 +54,10 @@ const blogSchema = new mongoose.Schema({
     timestamps: true
 });
 
+// Indexes for faster queries
+blogSchema.index({ createdAt: -1 });
+blogSchema.index({ author: 1, createdAt: -1 });
+
 // Calculate read time before saving
 blogSchema.pre('save', function (next) {
     if (this.isModified('content')) {

@@ -1,8 +1,10 @@
 import express from 'express';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import OTP from '../models/OTP.js';
+import redis from '../config/redis.js';
 import { protect, generateToken } from '../middleware/auth.js';
 import { sendVerificationEmail, sendOTPEmail } from '../utils/sendEmail.js';
 
@@ -226,6 +228,31 @@ router.post('/login', async (req, res) => {
                 settings: user.settings,
                 token
             }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+// @desc    Logout user (blacklist token)
+// @route   POST /api/auth/logout
+// @access  Private
+router.post('/logout', protect, async (req, res) => {
+    try {
+        const token = req.token; // attached by protect middleware
+        const decoded = jwt.decode(token);
+        const ttl = decoded?.exp ? decoded.exp - Math.floor(Date.now() / 1000) : 0;
+
+        if (ttl > 0) {
+            await redis.setex(`bl:${token}`, ttl, '1');
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully'
         });
     } catch (error) {
         res.status(500).json({

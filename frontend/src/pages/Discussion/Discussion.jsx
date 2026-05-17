@@ -6,11 +6,14 @@ import { Plus, MessageSquare, Eye, Clock, X, Hash, Pin, Shield, Trash2, Globe } 
 import './Discussion.css';
 
 const Discussion = () => {
-    const { user, isAdmin } = useAuth();
+    const { user, isAdmin, isTrusted } = useAuth();
     const [threads, setThreads] = useState([]);
     const [channels, setChannels] = useState([]);
     const [activeChannel, setActiveChannel] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [nextCursor, setNextCursor] = useState(null);
+    const [hasMore, setHasMore] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showChannelModal, setShowChannelModal] = useState(false);
     const [formData, setFormData] = useState({
@@ -47,16 +50,31 @@ const Discussion = () => {
         }
     };
 
-    const fetchThreads = async () => {
-        setLoading(true);
+    const fetchThreads = async (loadMore = false) => {
+        if (loadMore) {
+            setLoadingMore(true);
+        } else {
+            setLoading(true);
+        }
         try {
-            const url = activeChannel ? `/threads?channel=${activeChannel}` : '/threads';
+            let url = activeChannel ? `/threads?channel=${activeChannel}` : '/threads';
+            if (loadMore && nextCursor) {
+                url += `&cursor=${nextCursor}`;
+            }
             const res = await api.get(url);
-            setThreads(res.data.data);
+            const { data, nextCursor: newCursor, hasMore: more } = res.data;
+            if (loadMore) {
+                setThreads(prev => [...prev, ...data]);
+            } else {
+                setThreads(data);
+            }
+            setNextCursor(newCursor);
+            setHasMore(more);
         } catch (error) {
             console.error('Error fetching threads:', error);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     };
 
@@ -175,7 +193,7 @@ const Discussion = () => {
                     <div className="channel-sidebar">
                         <div className="channel-sidebar-header">
                             <h3>Channels</h3>
-                            {isAdmin && (
+                            {(isAdmin || isTrusted) && (
                                 <button
                                     className="btn btn-ghost btn-icon btn-sm"
                                     onClick={() => setShowChannelModal(true)}
@@ -325,6 +343,19 @@ const Discussion = () => {
                                         </div>
                                     );
                                 })}
+                            </div>
+                        )}
+
+                        {/* Load More */}
+                        {hasMore && (
+                            <div className="load-more-container">
+                                <button
+                                    className="btn btn-ghost load-more-btn"
+                                    onClick={() => fetchThreads(true)}
+                                    disabled={loadingMore}
+                                >
+                                    {loadingMore ? 'Loading...' : 'Load more'}
+                                </button>
                             </div>
                         )}
                     </div>

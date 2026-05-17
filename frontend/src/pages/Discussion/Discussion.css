@@ -465,3 +465,21 @@
         padding: var(--spacing-md);
     }
 }
+
+/* Load More */
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-xl) 0;
+}
+
+.load-more-btn {
+    padding: var(--spacing-md) var(--spacing-2xl);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

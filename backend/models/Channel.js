@@ -26,5 +26,6 @@ const channelSchema = new mongoose.Schema({
 });
 
 channelSchema.index({ name: 1 }, { unique: true });
+channelSchema.index({ isDefault: 1 });
 
 export default mongoose.model('Channel', channelSchema);

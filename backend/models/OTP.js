@@ -20,6 +20,8 @@ const otpSchema = new mongoose.Schema({
     timestamps: true
 });
 
+otpSchema.index({ email: 1 });
+
 // Generate a 6-digit OTP
 otpSchema.statics.generateOTP = function () {
     return crypto.randomInt(100000, 999999).toString();

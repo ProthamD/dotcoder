@@ -71,10 +71,18 @@ export const AuthProvider = ({ children }) => {
         return userData;
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        delete api.defaults.headers.common['Authorization'];
-        setUser(null);
+    const logout = async () => {
+        try {
+            // Blacklist the token on the server side (Redis)
+            await api.post('/auth/logout');
+        } catch (error) {
+            // Ignore errors (server may be offline) — still clear client-side state
+            console.error('Logout API call failed:', error.message);
+        } finally {
+            localStorage.removeItem('token');
+            delete api.defaults.headers.common['Authorization'];
+            setUser(null);
+        }
     };
 
     const updateSettings = async (settings) => {

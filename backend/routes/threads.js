@@ -1,7 +1,34 @@
 import express from 'express';
 import Thread from '../models/Thread.js';
 import Channel from '../models/Channel.js';
-import { protect, adminOnly } from '../middleware/auth.js';
+import redis from '../config/redis.js';
+import { protect, adminOnly, adminOrOwner } from '../middleware/auth.js';
+
+const THREADS_CACHE_TTL = 30; // 30 seconds
+
+function threadsCacheKey(channel) {
+    return channel ? `threads:channel:${channel}` : 'threads:all';
+}
+
+async function clearThreadCaches(channelId) {
+    const keys = ['threads:all'];
+    if (channelId) keys.push(`threads:channel:${channelId.toString()}`);
+    await redis.del(...keys);
+}
+
+// Redis-based rate limiting: 10 threads per day per user
+async function checkThreadRateLimit(userId) {
+    const key = `ratelimit:threads:${userId}`;
+    const count = await redis.incr(key);
+    if (count === 1) {
+        // Set expiry to end of day
+        const now = new Date();
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        const ttl = Math.ceil((endOfDay - now) / 1000);
+        await redis.expire(key, ttl);
+    }
+    return count;
+}
 
 const router = express.Router();
 
@@ -21,23 +48,68 @@ const ensureGlobalChannel = async () => {
     }
 };
 
-// Get all threads (optionally filter by channel)
+// Get all threads (optionally filter by channel, with cursor-based pagination)
 router.get('/', protect, async (req, res) => {
     try {
         await ensureGlobalChannel();
 
-        const filter = {};
-        if (req.query.channel) {
-            filter.channel = req.query.channel;
+        const { channel, cursor, limit: limitParam } = req.query;
+        const limit = Math.min(parseInt(limitParam) || 20, 50);
+
+        // Cache the initial page load (no cursor) for 30 seconds
+        if (!cursor) {
+            const cacheKey = threadsCacheKey(channel);
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                return res.json(JSON.parse(cached));
+            }
         }
 
+        const baseFilter = {};
+        if (channel) {
+            baseFilter.channel = channel;
+        }
+
+        // Pinned threads are always returned on initial load (no cursor)
+        let pinnedThreads = [];
+        if (!cursor) {
+            pinnedThreads = await Thread.find({ ...baseFilter, isPinned: true })
+                .populate('user', 'name email role')
+                .populate('replies.user', 'name email role')
+                .populate('channel', 'name')
+                .sort({ isPrioritized: -1, createdAt: -1 });
+        }
+
+        // Cursor-based pagination for non-pinned threads
+        const filter = { ...baseFilter, isPinned: { $ne: true } };
+        if (cursor) {
+            filter._id = { $lt: cursor };
+        }
+
+        // Fetch limit + 1 to detect if more exist
         const threads = await Thread.find(filter)
             .populate('user', 'name email role')
             .populate('replies.user', 'name email role')
             .populate('channel', 'name')
-            .sort({ isPinned: -1, createdAt: -1 });
-        
-        res.json({ success: true, data: threads });
+            .sort({ createdAt: -1 })
+            .limit(limit + 1);
+
+        const hasMore = threads.length > limit;
+        if (hasMore) threads.pop();
+
+        const nextCursor = hasMore ? threads[threads.length - 1]._id : null;
+
+        // Combine: pinned first, then paginated threads
+        const data = [...pinnedThreads, ...threads];
+
+        const result = { success: true, data, nextCursor, hasMore };
+
+        // Cache initial page load
+        if (!cursor) {
+            await redis.setex(threadsCacheKey(channel), THREADS_CACHE_TTL, JSON.stringify(result));
+        }
+
+        res.json(result);
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -68,19 +140,13 @@ router.get('/:id', protect, async (req, res) => {
 // Create thread
 router.post('/', protect, async (req, res) => {
     try {
-        // Check daily limit (10 threads per day)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        const todayThreadCount = await Thread.countDocuments({
-            user: req.user.id,
-            createdAt: { $gte: today }
-        });
+        // Daily thread limit: 10 threads per day (Redis-based)
+        const threadCount = await checkThreadRateLimit(req.user.id);
 
-        if (todayThreadCount >= 10) {
-            return res.status(429).json({ 
-                success: false, 
-                message: 'Daily thread limit reached (10 threads per day)' 
+        if (threadCount > 10) {
+            return res.status(429).json({
+                success: false,
+                message: 'Daily thread limit reached (10 threads per day)'
             });
         }
 
@@ -114,6 +180,8 @@ router.post('/', protect, async (req, res) => {
             .populate('user', 'name email role')
             .populate('channel', 'name');
 
+        await clearThreadCaches(channelId);
+
         res.status(201).json({ success: true, data: populatedThread });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -140,6 +208,8 @@ router.post('/:id/replies', protect, async (req, res) => {
             .populate('user', 'name email role')
             .populate('replies.user', 'name email role')
             .populate('channel', 'name');
+
+        await clearThreadCaches(thread.channel);
 
         res.json({ success: true, data: updatedThread });
     } catch (error) {
@@ -168,6 +238,8 @@ router.put('/:id/prioritize', protect, adminOnly, async (req, res) => {
             .populate('replies.user', 'name email role')
             .populate('channel', 'name');
 
+        await clearThreadCaches(thread.channel);
+
         res.json({ success: true, data: updatedThread });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -195,6 +267,8 @@ router.put('/:id/pin', protect, adminOnly, async (req, res) => {
             .populate('replies.user', 'name email role')
             .populate('channel', 'name');
 
+        await clearThreadCaches(thread.channel);
+
         res.json({ success: true, data: updatedThread });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -215,7 +289,9 @@ router.delete('/:id', protect, async (req, res) => {
 
         // Admin can delete any thread
         if (isAdmin) {
+            const channelId = thread.channel;
             await thread.deleteOne();
+            await clearThreadCaches(channelId);
             return res.json({ success: true, message: 'Thread deleted' });
         }
 
@@ -227,7 +303,9 @@ router.delete('/:id', protect, async (req, res) => {
                     message: 'This thread has been prioritized by an admin and cannot be deleted'
                 });
             }
+            const channelId = thread.channel;
             await thread.deleteOne();
+            await clearThreadCaches(channelId);
             return res.json({ success: true, message: 'Thread deleted' });
         }
 
@@ -265,6 +343,8 @@ router.delete('/:threadId/replies/:replyId', protect, async (req, res) => {
             .populate('user', 'name email role')
             .populate('replies.user', 'name email role')
             .populate('channel', 'name');
+
+        await clearThreadCaches(thread.channel);
 
         res.json({ success: true, data: updatedThread });
     } catch (error) {
